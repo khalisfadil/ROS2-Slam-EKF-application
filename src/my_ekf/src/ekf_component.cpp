@@ -1,4 +1,6 @@
-#include "my_ekf/ekf_component.hpp"
+
+
+#include <my_ekf/ekf_component.hpp>
 #include <chrono>
 #include <vector>
 #include <memory>
@@ -8,7 +10,7 @@ using namespace std::chrono_literals;
 
 namespace autobin
 {
-    EKFComponent::EKFComponent(const rclcpp::Nodeoptions & options)
+    EKFComponent::EKFComponent(const rclcpp::NodeOptions & options)
     : Node("extended_kalman_filter", options),
         clock_(RCL_ROS_TIME),
         tfbuffer_(std::make_shared<rclcpp::Clock>(clock_)),
@@ -35,7 +37,7 @@ namespace autobin
             //------------------------------------------------------------------
             //------------------------------------------------------------------
 
-            set_on_parameters_set_callback([this](const stf::vector<rclcpp::Parameter>params) -> rcl_interfaces::msg::SetParametersResult
+            set_on_parameters_set_callback([this](const std::vector<rclcpp::Parameter>params) -> rcl_interfaces::msg::SetParametersResult
                 {
                     auto results = std::make_shared<rcl_interfaces::msg::SetParametersResult>();
                     for (auto param : params) 
@@ -75,7 +77,7 @@ namespace autobin
             //------------------------------------------------------------------
             //setup Subcriber
 
-            auto initial_state_callback = [this](const typename nmea_msgs::msg::gpgga::SharedPtr msg) -> void
+            auto initial_state_callback = [this](const typename nmea_msgs::msg::Gpgga::SharedPtr msg) -> void
             {
                 std::cout << "setup and call the initial gps information for latitude and longitude " << std::endl;
                 initial_pose_received_ = true;
@@ -86,7 +88,7 @@ namespace autobin
                 double diff_latitude = current_latitude - previous_latitude;
                 previous_latitude = current_latitude;
 
-                double diff_longitude = current_longitude - previous longitude;
+                double diff_longitude = current_longitude - previous_longitude;
                 previous_longitude = current_longitude;
 
                 double radius_earth_ = 6378388.00;//m
@@ -95,21 +97,21 @@ namespace autobin
                 double pose_x_ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
                 double pose_y_ = arc *  diff_latitude;
 
-                Eigen::VectorXd x = Eigen::VectorXd::Zero(ekf_.getNumState());
+                Eigen::VectorXd x = Eigen::VectorXd::Zero(ekf.getNumState());
                 x(STATE::X) = pose_x_;
                 x(STATE::Y) = pose_y_;
                 x(STATE::PSIS) = 0.5 * M_PI;
-                x(STATE::VEL) = 0.0;
+                x(STATE::V) = 0.0;
 
-                ekf.setInitialX(x);
+                ekf.setInitialState(x);
             };
 
-            auto gnss_pose_callback = [this](const typename nmea_msgs::msg::gpgga::sharedPtr msg) -> void
+            auto gnss_pose_callback = [this](const typename nmea_msgs::msg::Gpgga::SharedPtr msg) -> void
             {
                 if(initial_pose_received_ && use_gnss_)
                 {
                     //std::cout << "setup the dimensional state vector x" << std::endl;
-                    chcv_msgs::msg::gnss gnss_in;
+                    chcv_msgs::msg::Gnss gnss_in;
                     
                     gnss_pose_ = *msg;
                     double pose_latitude = gnss_pose_.lat;
@@ -121,11 +123,11 @@ namespace autobin
                     double diff_pose_longitude = pose_longitude - previous_pose_longitude;
                     previous_pose_longitude = pose_longitude;
 
-                    double radius_earth_ = 6378388.00
-                    double arc = 2.0 * M_PI * (pose_latitude p radius_earth_) / 360.0;
+                    double radius_earth_ = 6378388.00;
+                    double arc = 2.0 * M_PI * (pose_latitude + radius_earth_) / 360.0;
 
                     double pose_x = arc * cos(pose_latitude * M_PI / 180.0) * diff_pose_longitude;
-                    double pose_y = arc * diff_latitude;
+                    double pose_y = arc * diff_pose_latitude;
 
                     //const double pose_x_init_,
                     //const double pose_y_init_,
@@ -141,22 +143,22 @@ namespace autobin
                     gnss_in.x = pose_x;
                     gnss_in.y = pose_y;
                    
-                   ekf_predicton_correction(gnss_in, var_R);
+                   ekf_prediction_correction(gnss_in, var_R);
                 }
-            }
+            };
 
             //subcription initial pose
-            sub_gnss_initial_pose_ = create_subcription<nmea_msgs::msg::gpgga>(gnss_pose_topic_, 1, intial_state_callback);
+            sub_gnss_initial_pose_ = create_subscription<nmea_msgs::msg::Gpgga>(gnss_pose_topic_, 1, initial_state_callback);
 
             //subcription gnss 
             //here I ahve 2 subcriber in a single topic
-            sub_gnss_pose_ = create_subcription<nmea_msgs::msg::gpgga>(gnss_pose_topic_, 1, gnss_pose_callback);
+            sub_gnss_pose_ = create_subscription<nmea_msgs::msg::Gpgga>(gnss_pose_topic_, 1, gnss_pose_callback);
 
             //------------------------------------------------------------------
             //------------------------------------------------------------------
             //setup Publisher
 
-            ekf_pose_pub_ = create_publisher<chcv_msgs::msg::chcv>("ekf_output",rclcpp::Qos(10));
+            ekf_pose_pub_ = create_publisher<chcv_msgs::msg::Chcv>("ekf_output",rclcpp::QoS(10));
             
             //cum_pose = create_publisher<chcv_msgs::msg::gnss>("cummulative_output", rclcpp::Qos(10));
 
@@ -169,7 +171,7 @@ namespace autobin
         //------------------------------------------------------------------
         //------------------------------------------------------------------
 
-        void EKFComponent::ekf_prediction_correction(const chcv_msgs::msg::gnss msg, const Eigen::Vector2d variance)
+        void EKFComponent::ekf_prediction_correction(const chcv_msgs::msg::Gnss msg, const Eigen::Vector2d variance)
         {
             current_stamp_ = msg.header.stamp;
 

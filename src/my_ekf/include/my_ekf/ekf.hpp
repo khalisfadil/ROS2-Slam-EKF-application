@@ -1,6 +1,5 @@
-
-#ifndef MY_EKF_EKF_HPP_
-#define MY_EKF_EKF_HPP_
+#ifndef AUTOBIN__EKF_HPP_
+#define AUTOBIN__EKF_HPP_
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
@@ -58,7 +57,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
             double a14 = dt * cos(state_x(STATE::PSIS));
 
-            double a23 = dt * state_x(STATE::V) * cos(state_x(STATE:PSIS));
+            double a23 = dt * state_x(STATE::V) * cos(state_x(STATE::PSIS));
 
             double a24 = dt * sin(state_x(STATE::PSIS));
 
@@ -103,7 +102,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
         
             Eigen::MatrixXd JH = Eigen::Matrix<double, 2, num_state_>::Zero();
             
-            JH.block<2,2>(0,0) = Eigen::matrix2d::Identity();
+            JH.block<2,2>(0,0) = Eigen::Matrix2d::Identity();
 
             Eigen::MatrixXd K = P * JH.transpose() * (JH* P * JH.transpose() + R).inverse(); //matrix of 4x2
 
@@ -117,7 +116,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
             state_x(STATE::Y) = state_x(STATE::Y) + dx(1);
 
-            state_x(SATE::PSIS) = state_x(STATE::PSIS);
+            state_x(STATE::PSIS) = state_x(STATE::PSIS);
 
             state_x(STATE::V) = state_x(STATE::V);
 
@@ -150,6 +149,8 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
     
     private:
 
+    double previous_stamp_gnss;
+
     static const int num_state_{4};
 
     Eigen::Matrix<double, num_state_, 1> state_x; //state x (4*1)
@@ -161,9 +162,6 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
         X =  0 , Y = 1 , PSIS = 2 , V = 3
     };
 
-    
-    
+};
 
-}
-
-#endif //MY_EKF_EKF_HPP_
+#endif  // AUTOBIN__EKF_HPP_

@@ -1,10 +1,53 @@
-#include <my_ekf/ekf.hpp>
 
+#ifndef AUTOBIN__EKF_COMPONENT_HPP_
+#define AUTOBIN__EKF_COMPONENT_HPP_
+
+#if __cplusplus
+extern "C" {
+#endif
+
+// The below macros are taken from https://gcc.gnu.org/wiki/Visibility and from
+// demos/composition/include/composition/visibility_control.h at https://github.com/ros2/demos
+#if defined _WIN32 || defined __CYGWIN__
+  #ifdef __GNUC__
+    #define A_EKFC_EXPORT __attribute__ ((dllexport))
+    #define A_EKFC_IMPORT __attribute__ ((dllimport))
+  #else
+    #define A_EKFC_EXPORT __declspec(dllexport)
+    #define A_EKFC_IMPORT __declspec(dllimport)
+  #endif
+  #ifdef A_EKFC_BUILDING_DLL
+    #define A_EKFC_PUBLIC A_EKFC_EXPORT
+  #else
+    #define A_EKFC_PUBLIC A_EKFC_IMPORT
+  #endif
+  #define A_EKFC_PUBLIC_TYPE A_EKFC_PUBLIC
+  #define A_EKFC_LOCAL
+#else
+  #define A_EKFC_EXPORT __attribute__ ((visibility("default")))
+  #define A_EKFC_IMPORT
+  #if __GNUC__ >= 4
+    #define A_EKFC_PUBLIC __attribute__ ((visibility("default")))
+    #define A_EKFC_LOCAL  __attribute__ ((visibility("hidden")))
+  #else
+    #define A_EKFC_PUBLIC
+    #define A_EKFC_LOCAL
+  #endif
+  #define A_EKFC_PUBLIC_TYPE
+#endif
+
+#if __cplusplus
+}  // extern "C"
+#endif
+
+
+
+#include <my_ekf/ekf.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <rclcpp_components/register_node_macro.hpp>
 
-#include <eigen3/Core>
+#include <eigen3/Eigen/Core>
 
 #include <string>
 
@@ -14,16 +57,16 @@
 #include <tf2/convert.h>
 
 #include <chcv_msgs/msg/chcv.hpp>
-
 #include <chcv_msgs/msg/gnss.hpp>
+#include <nmea_msgs/msg/gpgga.hpp>
 
 namespace autobin
 {
-    class EKFComponent : public rclcpp::Node;
+    class EKFComponent : public rclcpp::Node
     {
         public:
-        //MY_EKF_PUBLIC
-            explicit EKFComponent(const rclcpp::NodeOptions & options)
+            A_EKFC_PUBLIC
+            explicit EKFComponent(const rclcpp::NodeOptions & options);
 
         private:
             std::string reference_frame_id_;
@@ -38,18 +81,27 @@ namespace autobin
 
             bool initial_pose_received_{false};
 
-            chcv_msgs::msg::chcv chcv_out;
+            chcv_msgs::msg::Chcv chcv_out;
             rclcpp::Time current_stamp_;
 
             EKF_CHCV ekf;
 
-            //subcriber
-            rclcpp::Subcription<nmea_msgs::msg::gpgga>::SharedPtr sub_gnss_initial_pose_;
+            nmea_msgs::msg::Gpgga current_gnss_pose_, gnss_pose_;
+            double previous_latitude;
+            double previous_longitude;
+            double previous_pose_longitude;
+            double previous_pose_latitude;
+            double arc;
+            chcv_msgs::msg::Gnss gnss_in;
 
-            rclcpp::Subcription<nmea_msgs::msg::gpgga>::SharedPtr sub_gnss_pose_;
+
+            //subcriber
+            rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_initial_pose_;
+
+            rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_pose_;
 
             //Publisher
-            rclcpp::Publisher<chcv_msgs::msg::chcv>::SharedPtr ekf_pose_pub_;
+            rclcpp::Publisher<chcv_msgs::msg::Chcv>::SharedPtr ekf_pose_pub_;
 
             //Timer
             rclcpp::TimerBase::SharedPtr timer_;
@@ -60,7 +112,15 @@ namespace autobin
             tf2_ros::TransformListener listener_;
 
             //function
-            
+            void ekf_prediction_correction(const chcv_msgs::msg::Gnss msg, const Eigen::Vector2d variance);
+            void broadcastPose();
 
-    }
+            enum STATE
+            {
+                X = 0, Y = 1, PSIS = 2, V =4,
+            };
+
+    };
 }
+
+#endif  // AUTOBIN__EKF_COMPONENT_HPP_
