@@ -1,0 +1,63 @@
+[0.098s] Invoking command in '/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/src/chcv_msgs -DCMAKE_INSTALL_PREFIX=/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs
+[0.647s] -- The C compiler identification is GNU 9.4.0
+[0.952s] -- The CXX compiler identification is GNU 9.4.0
+[0.985s] -- Check for working C compiler: /usr/bin/cc
+[1.179s] -- Check for working C compiler: /usr/bin/cc -- works
+[1.182s] -- Detecting C compiler ABI info
+[1.283s] -- Detecting C compiler ABI info - done
+[1.298s] -- Detecting C compile features
+[1.299s] -- Detecting C compile features - done
+[1.317s] -- Check for working CXX compiler: /usr/bin/c++
+[1.431s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[1.435s] -- Detecting CXX compiler ABI info
+[1.538s] -- Detecting CXX compiler ABI info - done
+[1.554s] -- Detecting CXX compile features
+[1.555s] -- Detecting CXX compile features - done
+[1.557s] -- Found ament_cmake: 0.9.9 (/opt/ros/foxy/share/ament_cmake/cmake)
+[1.648s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.10", minimum required is "3") 
+[1.649s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[2.083s] -- Found rclcpp: 2.4.1 (/opt/ros/foxy/share/rclcpp/cmake)
+[2.332s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[2.366s] -- Found rosidl_adapter: 1.2.1 (/opt/ros/foxy/share/rosidl_adapter/cmake)
+[2.657s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "1.1.1f")  
+[2.727s] -- Found FastRTPS: /opt/ros/foxy/include  
+[2.869s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[3.000s] -- Found rmw_implementation_cmake: 1.0.3 (/opt/ros/foxy/share/rmw_implementation_cmake/cmake)
+[3.003s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[3.028s] -- Looking for pthread.h
+[3.122s] -- Looking for pthread.h - found
+[3.122s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[3.235s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+[3.236s] -- Looking for pthread_create in pthreads
+[3.345s] -- Looking for pthread_create in pthreads - not found
+[3.345s] -- Looking for pthread_create in pthread
+[3.449s] -- Looking for pthread_create in pthread - found
+[3.450s] -- Found Threads: TRUE  
+[3.839s] -- Found ament_lint_auto: 0.9.6 (/opt/ros/foxy/share/ament_lint_auto/cmake)
+[4.001s] -- Added test 'copyright' to check source files copyright and LICENSE
+[4.003s] -- Added test 'lint_cmake' to check CMake code style
+[4.004s] -- Added test 'xmllint' to check XML markup files
+[4.008s] -- Configuring done
+[4.011s] -- Generating done
+[4.013s] -- Build files have been written to: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs
+[4.026s] Invoked command in '/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs' returned '0': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/src/chcv_msgs -DCMAKE_INSTALL_PREFIX=/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs
+[4.028s] Invoking command in '/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --build /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs -- -j12 -l12
+[4.083s] Invoked command in '/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs' returned '0': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --build /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs -- -j12 -l12
+[4.119s] Invoking command in '/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --install /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs
+[4.135s] -- Install configuration: ""
+[4.136s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/ament_index/resource_index/package_run_dependencies/chcv_msgs
+[4.137s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/ament_index/resource_index/parent_prefix_path/chcv_msgs
+[4.137s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/environment/ament_prefix_path.sh
+[4.137s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/environment/ament_prefix_path.dsv
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/environment/path.sh
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/environment/path.dsv
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/local_setup.bash
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/local_setup.sh
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/local_setup.zsh
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/local_setup.dsv
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/package.dsv
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/ament_index/resource_index/packages/chcv_msgs
+[4.138s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/cmake/chcv_msgsConfig.cmake
+[4.139s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/cmake/chcv_msgsConfig-version.cmake
+[4.139s] -- Installing: /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/install/chcv_msgs/share/chcv_msgs/package.xml
+[4.262s] Invoked command in '/opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs' returned '0': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --install /opt/my_workspace/ros2-slam-ekf-application/ros2_ws/build/chcv_msgs
