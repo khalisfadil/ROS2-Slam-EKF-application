@@ -1,4 +1,0 @@
-source;share/my_ekf/local_setup.bash
-source;share/my_ekf/local_setup.dsv
-source;share/my_ekf/local_setup.sh
-source;share/my_ekf/local_setup.zsh
