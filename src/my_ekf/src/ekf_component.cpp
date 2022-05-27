@@ -122,22 +122,22 @@ namespace autobin
                 x(STATE::V) = 0.0;
 
                 ekf.setInitialState(x);
-
-                std::cout <<"============================================================================"<< std::endl;
-                std::cout <<"====================== initial state-callback==============================="<< std::endl;
-                std::cout <<" Lat:  " << current_latitude << "    " <<"Lon:  " << current_longitude << std::endl;
-                std::cout <<" X:  " <<  x(STATE::X) << "    " << "Y:  " << x(STATE::Y)<< "    " << "Yaw:  " << x(STATE::PSIS) << "    " << "Vel:  " << x(STATE::V) << std::endl;
-                std::cout <<"============================================================================"<< std::endl;
                 //std::cout << "pose PSIS:  " << std::endl;
 
                 //RCLCPP_INFO(get_logger(), "initialization end");
 
-                initialized_finished = true;
+                //initialized_finished = true;
+
+                //std::cout <<"============================================================================"<< std::endl;
+                //std::cout <<"====================== initial state-callback==============================="<< std::endl;
+                //std::cout <<" Lat:  " << pose_latitude << "    " <<"Lon:  " << pose_longitude << std::endl;
+                //std::cout <<" X:  " <<  x(STATE::X) << "    " << "Y:  " << x(STATE::Y)<< "    " << "Yaw:  " << x(STATE::PSIS) << "    " << "Vel:  " << x(STATE::V) << std::endl;
+                //std::cout <<"============================================================================"<< std::endl;
             };
 
             auto gnss_pose_callback = [this](const typename nmea_msgs::msg::Gpgga::SharedPtr msg) -> void
             {
-                if(initial_pose_received_ && initialized_finished)
+                if(initial_pose_received_)
                 {
                     //std::cout << "setup the dimensional state vector x" << std::endl;
                     chcv_msgs::msg::Gnss gnss_in;
@@ -171,10 +171,13 @@ namespace autobin
 
                     std::cout <<"============================================================================"<< std::endl;
                     std::cout <<"=============================GNSS-in callback==============================="<< std::endl;
+                    std::cout <<" Lat:  " << pose_latitude << "    " <<"Lon:  " << pose_longitude << std::endl;
                     std::cout <<" gnss.x:  " << gnss_in.x << "    " <<"gnss.y:  " << gnss_in.y << std::endl;
                     std::cout <<"============================================================================"<< std::endl;
-                   
-                   ekf_prediction_correction(gnss_in, var_R);
+                    
+
+                    
+                    ekf_prediction_correction(gnss_in, var_R);
                 }
             };
 
@@ -220,7 +223,8 @@ namespace autobin
         void EKFComponent::broadcastPose()
         {
             if (initial_pose_received_)
-            {
+            {   
+                //get the latest value of state x
                 auto x = ekf.getX();
                 chcv_out.header.stamp = current_stamp_;
                 chcv_out.x = x(STATE::X);

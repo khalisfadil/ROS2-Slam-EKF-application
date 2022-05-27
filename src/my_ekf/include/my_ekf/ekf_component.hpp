@@ -82,7 +82,7 @@ namespace autobin
             
             bool use_gnss_;
 
-            bool initial_pose_received_{false}, initialized_finished{false};
+            bool initial_pose_received_{false};
 
             chcv_msgs::msg::Chcv chcv_out;
             rclcpp::Time current_stamp_;
@@ -95,8 +95,8 @@ namespace autobin
             double previous_pose_longitude;
             double previous_pose_latitude;
             double arc;
-            double pose_x_init_,
-            double pose_y_init_,
+            double pose_x_init_;
+            double pose_y_init_;
             chcv_msgs::msg::Gnss gnss_in;
 
 
