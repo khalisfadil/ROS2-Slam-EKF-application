@@ -153,7 +153,8 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
     static const int num_state_{4};
 
-    Eigen::Matrix<double, 4, 1> state_x; //state x (4*1)
+    //Eigen::Matrix<double, 4, 1> state_x; //state x (4*1)
+    Eigen::Vector4d state_x;
 
     Eigen::Matrix<double,  num_state_,  num_state_> P; //initial uncertainty P (4*4)
 

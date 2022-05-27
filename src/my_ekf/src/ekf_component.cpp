@@ -104,9 +104,13 @@ namespace autobin
 
                 std::cout << "arc:  " << arc  << std::endl;
 
-                float pose_x_ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
-                float pose_y_ = arc *  diff_latitude;
-                float pose_psis_ = 0.5*M_PI;
+                double pose_x__ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
+                double pose_y__ = arc *  diff_latitude;
+                double pose_psis__ = 0.5*M_PI;
+                double pose_x_ = round( pose_x__ * 1000.0 ) / 1000.0;
+                double pose_y_ = round( pose_y__ * 1000.0 ) / 1000.0;
+                double pose_psis_ = round( pose_psis__ * 1000.0 ) / 1000.0;
+
 
                 std::cout << "pose X:  " << pose_x_ << "    " << "pose Y:  " << pose_y_<< "    " << "pose psis:  " << pose_psis_ << std::endl;
 
@@ -119,6 +123,7 @@ namespace autobin
 
                 ekf.setInitialState(x);
                 
+                std::cout << "X:  " <<  x(STATE::X) << "    " << "Y:  " << x(STATE::Y)<< "    " << "psis:  " << x(STATE::PSIS) << std::endl;
                 //std::cout << "pose PSIS:  " << std::endl;
 
                 RCLCPP_INFO(get_logger(), "initialization end");
