@@ -120,7 +120,7 @@ namespace autobin
 
             enum STATE
             {
-                X = 0, Y = 1, PSIS = 2, V =4,
+                X = 0, Y = 1, PSIS = 2, V =3,
             };
 
     };

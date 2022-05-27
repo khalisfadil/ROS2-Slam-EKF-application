@@ -85,8 +85,8 @@ namespace autobin
 
                 initial_pose_received_ = true;
                 current_gnss_pose_ = *msg; //call the initial gps information
-                double current_latitude = current_gnss_pose_.lat;
-                double current_longitude = current_gnss_pose_.lon;
+                double current_latitude = current_gnss_pose_.lat /100;
+                double current_longitude = current_gnss_pose_.lon /100;
 
                 std::cout << "current latitude:  " << current_latitude << "    " <<"current longitude:  " << current_longitude << std::endl;
 
@@ -104,12 +104,12 @@ namespace autobin
 
                 std::cout << "arc:  " << arc  << std::endl;
 
-                double pose_x__ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
-                double pose_y__ = arc *  diff_latitude;
-                double pose_psis__ = 0.5*M_PI;
-                double pose_x_ = round( pose_x__ * 1000.0 ) / 1000.0;
-                double pose_y_ = round( pose_y__ * 1000.0 ) / 1000.0;
-                double pose_psis_ = round( pose_psis__ * 1000.0 ) / 1000.0;
+                double pose_x_ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
+                double pose_y_ = arc *  diff_latitude;
+                double pose_psis_ = 0.5*M_PI;
+                //double pose_x_ = round( pose_x__ * 1000.0 ) / 1000.0;
+                //double pose_y_ = round( pose_y__ * 1000.0 ) / 1000.0;
+                //double pose_psis_ = round( pose_psis__ * 1000.0 ) / 1000.0;
 
 
                 std::cout << "pose X:  " << pose_x_ << "    " << "pose Y:  " << pose_y_<< "    " << "pose psis:  " << pose_psis_ << std::endl;
