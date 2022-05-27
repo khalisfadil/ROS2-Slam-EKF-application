@@ -48,6 +48,7 @@ extern "C" {
 #include <rclcpp_components/register_node_macro.hpp>
 
 #include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 #include <string>
 
@@ -59,6 +60,8 @@ extern "C" {
 #include <chcv_msgs/msg/chcv.hpp>
 #include <chcv_msgs/msg/gnss.hpp>
 #include <nmea_msgs/msg/gpgga.hpp>
+
+#include <iostream>
 
 namespace autobin
 {
@@ -79,7 +82,7 @@ namespace autobin
             
             bool use_gnss_;
 
-            bool initial_pose_received_{false};
+            bool initial_pose_received_{false}, initialized_finished{false};
 
             chcv_msgs::msg::Chcv chcv_out;
             rclcpp::Time current_stamp_;

@@ -16,27 +16,29 @@ namespace autobin
         tfbuffer_(std::make_shared<rclcpp::Clock>(clock_)),
         listener_(tfbuffer_)
         {
-            declare_parameter("reference_frame_id", "map");
-            get_parameter("reference_frame_id", reference_frame_id_);
+            //declare_parameter("reference_frame_id", "map");
+            //get_parameter("reference_frame_id", reference_frame_id_);
 
-            declare_parameter("robot_frame_id", "base_link");
-            get_parameter("robot_frame_id", robot_frame_id_);
+            //declare_parameter("robot_frame_id", "base_link");
+            //get_parameter("robot_frame_id", robot_frame_id_);
             
             declare_parameter("gnss_pose_topic", "gnss_pose");
             get_parameter("gnss_pose_topic", gnss_pose_topic_);
 
-            declare_parameter("pub_period", 10);
+            declare_parameter("pub_period", 3);
             get_parameter("pub_period", pub_period_);
 
             declare_parameter("var_GPS", 6.0);
             get_parameter("var_GPS", var_GPS_);
             
-            declare_parameter("use_gnss", false);
+            declare_parameter("use_gnss", true);
             get_parameter("use_gnss", use_gnss_);
 
-            //------------------------------------------------------------------
-            //------------------------------------------------------------------
+            std::cout << "gnss_pose_topic:" << gnss_pose_topic_ << std::endl;
 
+            //------------------------------------------------------------------
+            //------------------------------------------------------------------
+            
             set_on_parameters_set_callback([this](const std::vector<rclcpp::Parameter>params) -> rcl_interfaces::msg::SetParametersResult
                 {
                     auto results = std::make_shared<rcl_interfaces::msg::SetParametersResult>();
@@ -66,7 +68,7 @@ namespace autobin
                     return *results;
                 }
             );
-
+            
             //------------------------------------------------------------------
             //------------------------------------------------------------------
             //measurement noise covaariance matrix R
@@ -79,36 +81,54 @@ namespace autobin
 
             auto initial_state_callback = [this](const typename nmea_msgs::msg::Gpgga::SharedPtr msg) -> void
             {
-                std::cout << "setup and call the initial gps information for latitude and longitude " << std::endl;
+                RCLCPP_INFO(get_logger(), "initialization start");
+
                 initial_pose_received_ = true;
                 current_gnss_pose_ = *msg; //call the initial gps information
                 double current_latitude = current_gnss_pose_.lat;
                 double current_longitude = current_gnss_pose_.lon;
+
+                std::cout << "current latitude:  " << current_latitude << "    " <<"current longitude:  " << current_longitude << std::endl;
 
                 double diff_latitude = current_latitude - previous_latitude;
                 previous_latitude = current_latitude;
 
                 double diff_longitude = current_longitude - previous_longitude;
                 previous_longitude = current_longitude;
+                
+                
+                std::cout << "diff latitude:  " << diff_latitude  << "    " << "diff_longitude:  " << diff_longitude << std::endl;
 
                 double radius_earth_ = 6378388.00;//m
                 double arc = 2.0 * M_PI * (current_latitude +radius_earth_) / 360.0 ;//m²
 
-                double pose_x_ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
-                double pose_y_ = arc *  diff_latitude;
+                std::cout << "arc:  " << arc  << std::endl;
 
-                Eigen::VectorXd x = Eigen::VectorXd::Zero(ekf.getNumState());
+                float pose_x_ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
+                float pose_y_ = arc *  diff_latitude;
+                float pose_psis_ = 0.5*M_PI;
+
+                std::cout << "pose X:  " << pose_x_ << "    " << "pose Y:  " << pose_y_<< "    " << "pose psis:  " << pose_psis_ << std::endl;
+
+                Eigen::Vector4d x = Eigen::Vector4d::Zero(ekf.getNumState());
+               //Eigen::Map<Eigen::VectorXd> x;
                 x(STATE::X) = pose_x_;
                 x(STATE::Y) = pose_y_;
-                x(STATE::PSIS) = 0.5 * M_PI;
+                x(STATE::PSIS) = pose_psis_; //* M_PI;
                 x(STATE::V) = 0.0;
 
                 ekf.setInitialState(x);
+                
+                //std::cout << "pose PSIS:  " << std::endl;
+
+                RCLCPP_INFO(get_logger(), "initialization end");
+
+                initialized_finished = true;
             };
 
             auto gnss_pose_callback = [this](const typename nmea_msgs::msg::Gpgga::SharedPtr msg) -> void
             {
-                if(initial_pose_received_ && use_gnss_)
+                if(initial_pose_received_ && initialized_finished)
                 {
                     //std::cout << "setup the dimensional state vector x" << std::endl;
                     chcv_msgs::msg::Gnss gnss_in;
@@ -142,17 +162,19 @@ namespace autobin
                     gnss_in.header.stamp = msg->header.stamp;
                     gnss_in.x = pose_x;
                     gnss_in.y = pose_y;
+
+                    std::cout << "x:  " << pose_x << "    " << "y:  " << pose_y << std::endl;
                    
                    ekf_prediction_correction(gnss_in, var_R);
                 }
             };
 
             //subcription initial pose
-            sub_gnss_initial_pose_ = create_subscription<nmea_msgs::msg::Gpgga>(gnss_pose_topic_, 1, initial_state_callback);
+            sub_gnss_initial_pose_ = create_subscription<nmea_msgs::msg::Gpgga>(gnss_pose_topic_, rclcpp::SensorDataQoS(), initial_state_callback);
 
             //subcription gnss 
             //here I ahve 2 subcriber in a single topic
-            sub_gnss_pose_ = create_subscription<nmea_msgs::msg::Gpgga>(gnss_pose_topic_, 1, gnss_pose_callback);
+            sub_gnss_pose_ = create_subscription<nmea_msgs::msg::Gpgga>(gnss_pose_topic_, rclcpp::SensorDataQoS(), gnss_pose_callback);
 
             //------------------------------------------------------------------
             //------------------------------------------------------------------

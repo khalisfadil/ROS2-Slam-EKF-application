@@ -16,9 +16,9 @@ def generate_launch_description():
 
     ekf = launch_ros.actions.Node(
         package='my_ekf',
-        node_executable='ekf_node',
+        executable='ekf_node',
         parameters=[ekf_param_dir],
-        remappings=[('gnss_pose_topic', '/gnss_pose')],
+        remappings=[('gnss_pose', '/onboard_gps/onboard_gga')],
         output='screen'
         )
 

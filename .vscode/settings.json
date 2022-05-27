@@ -60,6 +60,9 @@
         "variant": "cpp",
         "bit": "cpp",
         "core": "cpp",
-        "geometry": "cpp"
+        "geometry": "cpp",
+        "strstream": "cpp",
+        "cfenv": "cpp",
+        "typeindex": "cpp"
     }
 }

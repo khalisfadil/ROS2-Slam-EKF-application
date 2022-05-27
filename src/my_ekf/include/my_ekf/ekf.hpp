@@ -11,7 +11,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
         EKF_CHCV()
         : P(Eigen::Matrix4d::Identity()*1000) //initial uncertainty
         {
-            state_x << 0,0,0,0;
+            state_x << 0.0,0.0,0.0,0.0;
         }
 
         //-----------------------------------------------
@@ -127,7 +127,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
         }
 
 
-        void setInitialState(Eigen::VectorXd x)
+        void setInitialState(Eigen::Vector4d x)
         {
             state_x = x;
         }
@@ -153,7 +153,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
     static const int num_state_{4};
 
-    Eigen::Matrix<double, num_state_, 1> state_x; //state x (4*1)
+    Eigen::Matrix<double, 4, 1> state_x; //state x (4*1)
 
     Eigen::Matrix<double,  num_state_,  num_state_> P; //initial uncertainty P (4*4)
 
