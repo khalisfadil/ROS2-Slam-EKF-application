@@ -81,14 +81,14 @@ namespace autobin
 
             auto initial_state_callback = [this](const typename nmea_msgs::msg::Gpgga::SharedPtr msg) -> void
             {
-                RCLCPP_INFO(get_logger(), "initialization start");
+                //RCLCPP_INFO(get_logger(), "initialization start");
 
                 initial_pose_received_ = true;
                 current_gnss_pose_ = *msg; //call the initial gps information
                 double current_latitude = current_gnss_pose_.lat /100;
                 double current_longitude = current_gnss_pose_.lon /100;
 
-                std::cout << "current latitude:  " << current_latitude << "    " <<"current longitude:  " << current_longitude << std::endl;
+                //std::cout << "current latitude:  " << current_latitude << "    " <<"current longitude:  " << current_longitude << std::endl;
 
                 double diff_latitude = current_latitude - previous_latitude;
                 previous_latitude = current_latitude;
@@ -97,12 +97,12 @@ namespace autobin
                 previous_longitude = current_longitude;
                 
                 
-                std::cout << "diff latitude:  " << diff_latitude  << "    " << "diff_longitude:  " << diff_longitude << std::endl;
+                //std::cout << "diff latitude:  " << diff_latitude  << "    " << "diff_longitude:  " << diff_longitude << std::endl;
 
                 double radius_earth_ = 6378388.00;//m
                 double arc = 2.0 * M_PI * (current_latitude +radius_earth_) / 360.0 ;//m²
 
-                std::cout << "arc:  " << arc  << std::endl;
+                //std::cout << "arc:  " << arc  << std::endl;
 
                 double pose_x_ = arc * cos(current_latitude * M_PI / 180.0) * diff_longitude; //m
                 double pose_y_ = arc *  diff_latitude;
@@ -112,7 +112,7 @@ namespace autobin
                 //double pose_psis_ = round( pose_psis__ * 1000.0 ) / 1000.0;
 
 
-                std::cout << "pose X:  " << pose_x_ << "    " << "pose Y:  " << pose_y_<< "    " << "pose psis:  " << pose_psis_ << std::endl;
+                //std::cout << "pose X:  " << pose_x_ << "    " << "pose Y:  " << pose_y_<< "    " << "pose psis:  " << pose_psis_ << std::endl;
 
                 Eigen::Vector4d x = Eigen::Vector4d::Zero(ekf.getNumState());
                //Eigen::Map<Eigen::VectorXd> x;
@@ -122,11 +122,15 @@ namespace autobin
                 x(STATE::V) = 0.0;
 
                 ekf.setInitialState(x);
-                
-                std::cout << "X:  " <<  x(STATE::X) << "    " << "Y:  " << x(STATE::Y)<< "    " << "psis:  " << x(STATE::PSIS) << std::endl;
+
+                std::cout <<"============================================================================"<< std::endl;
+                std::cout <<"====================== initial state-callback==============================="<< std::endl;
+                std::cout <<" Lat:  " << current_latitude << "    " <<"Lon:  " << current_longitude << std::endl;
+                std::cout <<" X:  " <<  x(STATE::X) << "    " << "Y:  " << x(STATE::Y)<< "    " << "Yaw:  " << x(STATE::PSIS) << "    " << "Vel:  " << x(STATE::V) << std::endl;
+                std::cout <<"============================================================================"<< std::endl;
                 //std::cout << "pose PSIS:  " << std::endl;
 
-                RCLCPP_INFO(get_logger(), "initialization end");
+                //RCLCPP_INFO(get_logger(), "initialization end");
 
                 initialized_finished = true;
             };
@@ -139,8 +143,8 @@ namespace autobin
                     chcv_msgs::msg::Gnss gnss_in;
                     
                     gnss_pose_ = *msg;
-                    double pose_latitude = gnss_pose_.lat;
-                    double pose_longitude = gnss_pose_.lon;
+                    double pose_latitude = gnss_pose_.lat/100;
+                    double pose_longitude = gnss_pose_.lon/100;
 
                     double diff_pose_latitude = pose_latitude - previous_pose_latitude;
                     previous_pose_latitude = pose_latitude;
@@ -153,22 +157,22 @@ namespace autobin
 
                     double pose_x = arc * cos(pose_latitude * M_PI / 180.0) * diff_pose_longitude;
                     double pose_y = arc * diff_pose_latitude;
-
-                    //const double pose_x_init_,
-                    //const double pose_y_init_,
                 
-                    //double cummulative_pose_x_ = pose_x_init_ + pose_x; //this is for defining the referrence value of x and y direct from gnss msg.
-                    //pose_x_init_ = cummulative_pose_x_;
+                    double cummulative_pose_x_ = pose_x_init_ + pose_x; //this is for defining the referrence value of x and y direct from gnss msg.
+                    pose_x_init_ = cummulative_pose_x_;
 
-                    //double cummulative_pose_y_ = pose_y_init_ + pose_y;
-                    //pose_y_init_ = cummulative_pose_y_;
+                    double cummulative_pose_y_ = pose_y_init_ + pose_y;
+                    pose_y_init_ = cummulative_pose_y_;
 
                     //to do = assign into msg for publishing
                     gnss_in.header.stamp = msg->header.stamp;
-                    gnss_in.x = pose_x;
-                    gnss_in.y = pose_y;
+                    gnss_in.x = cummulative_pose_x_;
+                    gnss_in.y = cummulative_pose_y_;
 
-                    std::cout << "x:  " << pose_x << "    " << "y:  " << pose_y << std::endl;
+                    std::cout <<"============================================================================"<< std::endl;
+                    std::cout <<"=============================GNSS-in callback==============================="<< std::endl;
+                    std::cout <<" gnss.x:  " << gnss_in.x << "    " <<"gnss.y:  " << gnss_in.y << std::endl;
+                    std::cout <<"============================================================================"<< std::endl;
                    
                    ekf_prediction_correction(gnss_in, var_R);
                 }

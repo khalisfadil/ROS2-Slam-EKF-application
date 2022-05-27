@@ -95,6 +95,8 @@ namespace autobin
             double previous_pose_longitude;
             double previous_pose_latitude;
             double arc;
+            double pose_x_init_,
+            double pose_y_init_,
             chcv_msgs::msg::Gnss gnss_in;
 
 
