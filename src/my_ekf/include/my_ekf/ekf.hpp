@@ -147,12 +147,12 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
             state_covariance(COVARIANCESTATE::P2) = P(1,1);
             
-            state_covariance(COVARIANCESTATE::P1) = P(2,2);
+            state_covariance(COVARIANCESTATE::P3) = P(2,2);
 
-            state_covariance(COVARIANCESTATE::P2) = P(3,3);
+            state_covariance(COVARIANCESTATE::P4) = P(3,3);
 
             
-            //check the value of the matrixS
+            //check the value of the matrix for each iterations
             
             std::cout <<"============================================================================"<< std::endl;
             std::cout <<"=================================matrix Check==============================="<< std::endl;
@@ -161,6 +161,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
             std::cout << "K: " << K(0,0) << ", " << K(0,1) << "; " << K(1,0) << ", " << K(1,1) << "; " << K(2,0) << ", " << K(2,1) << "; " << K(3,0) << ", " << K(3,1) << ";" << std::endl;
             std::cout << "ES: " << ES(0) << "; " << ES(1) << "; " << ES(2) << "; " << ES(3) << "; " << std::endl;
             std::cout << "X: " <<  state_x(STATE::X) << "    " << "Y:  " << state_x(STATE::Y)<< "    " << "Yaw:  " << state_x(STATE::PSIS) << "    " << "Vel:  " << state_x(STATE::V) << std::endl;
+            std::cout << "P1: " <<  state_covariance(COVARIANCESTATE::P1) << "    " << "P2:  " << state_covariance(COVARIANCESTATE::P2)<< "    " << "P3:  " << state_covariance(COVARIANCESTATE::P3) << "    " << "P4:  " << state_covariance(COVARIANCESTATE::P4) << std::endl;
             std::cout <<"============================================================================"<< std::endl;
             
         }
