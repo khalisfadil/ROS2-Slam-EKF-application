@@ -24,6 +24,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Chcv.msg"
   "msg/Gnss.msg"
+  "msg/Cov.msg"
   DEPENDENCIES builtin_interfaces std_msgs
 )
 

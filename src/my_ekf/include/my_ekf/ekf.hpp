@@ -142,8 +142,18 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
             //update the error covariance
             P = (Eigen::Matrix4d::Identity() - K * JH) * P;
+
+            state_covariance(COVARIANCESTATE::P1) = P(0,0);
+
+            state_covariance(COVARIANCESTATE::P2) = P(1,1);
+            
+            state_covariance(COVARIANCESTATE::P1) = P(2,2);
+
+            state_covariance(COVARIANCESTATE::P2) = P(3,3);
+
             
             //check the value of the matrixS
+            
             std::cout <<"============================================================================"<< std::endl;
             std::cout <<"=================================matrix Check==============================="<< std::endl;
             std::cout << "dt: " << dt << std::endl;
@@ -152,7 +162,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
             std::cout << "ES: " << ES(0) << "; " << ES(1) << "; " << ES(2) << "; " << ES(3) << "; " << std::endl;
             std::cout << "X: " <<  state_x(STATE::X) << "    " << "Y:  " << state_x(STATE::Y)<< "    " << "Yaw:  " << state_x(STATE::PSIS) << "    " << "Vel:  " << state_x(STATE::V) << std::endl;
             std::cout <<"============================================================================"<< std::endl;
-
+            
         }
 
 
@@ -173,7 +183,7 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
         Eigen::MatrixXd getMatrixCovariance()
         {
-            return P;
+            return state_covariance;
         }
 
         int getNumState()
@@ -192,6 +202,8 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
     Eigen::Vector2d state_gps;
 
+    Eigen::Vector4d state_covariance;
+
     Eigen::Matrix<double,  num_state_,  num_state_> P; //initial uncertainty P (4*4)
 
     enum STATE
@@ -202,6 +214,11 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
     enum GPSSTATE
     {
         DX = 0 , DY = 1
+    };
+
+    enum COVARIANCESTATE
+    {
+        P1 = 0, P2 = 1, P3 = 2, P4 = 3
     };
 
 };

@@ -59,6 +59,7 @@ extern "C" {
 
 #include <chcv_msgs/msg/chcv.hpp>
 #include <chcv_msgs/msg/gnss.hpp>
+#include <chcv_msgs/msg/cov.hpp>
 #include <nmea_msgs/msg/gpgga.hpp>
 
 #include <iostream>
@@ -86,22 +87,29 @@ namespace autobin
 
             chcv_msgs::msg::Chcv chcv_out;
             chcv_msgs::msg::Gnss gps_out;
+            chcv_msgs::msg::Cov cov_out;
 
             rclcpp::Time current_stamp_;
 
             EKF_CHCV ekf;
 
             nmea_msgs::msg::Gpgga current_gnss_pose_, gnss_pose_;
+
+            double diff_pose_latitude;
+            double diff_pose_longitude;
+            double diff_latitude;
+            double diff_longitude;
             double previous_latitude;
             double previous_longitude;
             double previous_pose_longitude;
             double previous_pose_latitude;
             double arc;
-            double pose_x_init_;
-            double pose_y_init_;
+            double pose_x_next_;
+            double pose_y_next_;
             chcv_msgs::msg::Gnss gnss_in;
 
             Eigen::Vector2d gps;
+            Eigen::Vector4d covariance;
 
 
             //subcriber
@@ -114,6 +122,7 @@ namespace autobin
 
             rclcpp::Publisher<chcv_msgs::msg::Gnss>::SharedPtr ekf_gps_pose_pub_;
 
+            rclcpp::Publisher<chcv_msgs::msg::Cov>::SharedPtr  ekf_cov_pub_;
 
             //Timer
             rclcpp::TimerBase::SharedPtr timer_;
@@ -135,6 +144,11 @@ namespace autobin
             enum GPSSTATE
             {
               DX = 0, DY = 1,
+            };
+
+            enum COVARIANCESTATE
+            {
+              P1 = 0, P2 = 1, P3 = 2, P4 = 3
             };
 
     };
