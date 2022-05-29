@@ -34,15 +34,15 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
         void predict_correct(const double current_stamp_gnss, const Eigen::Vector2d & gnss_input, const Eigen::Vector2d & variance)
         {
             //put the value of cummulative gnss input into a GPS state; ERROR STATE
-            state_gps(GPSSTATE::DX) = gnss_input(0);
+            state_gps(GPSSTATE::DX) = gnss_input.x();
 
-            state_gps(GPSSTATE::DY) = gnss_input(1);
+            state_gps(GPSSTATE::DY) = gnss_input.y();
 
             //assert the cummulative value into the state x; the state x will change accordingly:
 
-            state_x(STATE::X) = gnss_input(0);
+            state_x(STATE::X) = gnss_input.x();
 
-            state_x(STATE::Y) = gnss_input(1);
+            state_x(STATE::Y) = gnss_input.y();
             //from here initial state is used for the first time
             //the value of each state than calcualted
 
@@ -84,10 +84,10 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
 
             Eigen::Matrix4d Q;
 
-            Q << sGPS, 0, 0, 0,
-                0, sGPS, 0, 0,
-                0, 0, sCourse, 0,
-                0, 0, 0, sVelocity;
+            Q << pow(sGPS,2), 0, 0, 0,
+                0, pow(sGPS,2), 0, 0,
+                0, 0, pow(sCourse,2), 0,
+                0, 0, 0, pow(sVelocity,2);
 
             //prediction of the error covariance
             P = JA * P * JA.transpose() + Q;
@@ -120,6 +120,8 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
             
             JH.block<2,2>(0,0) = Eigen::Matrix2d::Identity();
 
+            //compute the Kalman gain
+
             Eigen::MatrixXd K = P * JH.transpose() * (JH* P * JH.transpose() + R).inverse(); //matrix of 4x2
 
             //measurement of error state Y and correction value ES
@@ -141,6 +143,15 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
             //update the error covariance
             P = (Eigen::Matrix4d::Identity() - K * JH) * P;
             
+            //check the value of the matrixS
+            std::cout <<"============================================================================"<< std::endl;
+            std::cout <<"=================================matrix Check==============================="<< std::endl;
+            std::cout << "dt: " << dt << std::endl;
+            std::cout << "Y: " << Y.x() << "; " << Y.y() << std::endl;
+            std::cout << "K: " << K(0,0) << ", " << K(0,1) << "; " << K(1,0) << ", " << K(1,1) << "; " << K(2,0) << ", " << K(2,1) << "; " << K(3,0) << ", " << K(3,1) << ";" << std::endl;
+            std::cout << "ES: " << ES(0) << "; " << ES(1) << "; " << ES(2) << "; " << ES(3) << "; " << std::endl;
+            std::cout << "X: " <<  state_x(STATE::X) << "    " << "Y:  " << state_x(STATE::Y)<< "    " << "Yaw:  " << state_x(STATE::PSIS) << "    " << "Vel:  " << state_x(STATE::V) << std::endl;
+            std::cout <<"============================================================================"<< std::endl;
 
         }
 
@@ -153,6 +164,11 @@ class EKF_CHCV //extended kalman filter constant heading constant velocity
         Eigen::VectorXd getX()
         {
             return state_x;
+        }
+
+        Eigen::Vector2d getX_GPS()
+        {
+            return state_gps;
         }
 
         Eigen::MatrixXd getMatrixCovariance()

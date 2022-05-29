@@ -73,7 +73,7 @@ namespace autobin
             //------------------------------------------------------------------
             //measurement noise covaariance matrix R
             
-            var_R << var_GPS_, var_GPS_;
+            var_R << pow(var_GPS_,2), pow(var_GPS_,2);
 
             //------------------------------------------------------------------
             //------------------------------------------------------------------
@@ -119,7 +119,7 @@ namespace autobin
                 x(STATE::X) = pose_x_;
                 x(STATE::Y) = pose_y_;
                 x(STATE::PSIS) = pose_psis_; //* M_PI;
-                x(STATE::V) = 0.0;
+                x(STATE::V) = 1.0;
 
                 ekf.setInitialState(x);
                 //std::cout << "pose PSIS:  " << std::endl;
@@ -193,6 +193,8 @@ namespace autobin
             //setup Publisher
 
             ekf_pose_pub_ = create_publisher<chcv_msgs::msg::Chcv>("ekf_output",rclcpp::QoS(10));
+
+            ekf_gps_pose_pub_ = create_publisher<chcv_msgs::msg::Gnss>("real_output", rclcpp::QoS(10));
             
             //cum_pose = create_publisher<chcv_msgs::msg::gnss>("cummulative_output", rclcpp::Qos(10));
 
@@ -231,13 +233,20 @@ namespace autobin
                 chcv_out.y = x(STATE::Y);
                 chcv_out.psis = x(STATE::PSIS);
                 chcv_out.v = x(STATE::V);
-
-
                 //------------------------------------------------------------------
                 //------------------------------------------------------------------
                 //publish the output of the EKF
-
                 ekf_pose_pub_ -> publish(chcv_out);
+                //-------------------------------------------------------------------
+                //-------------------------------------------------------------------
+                auto gps = ekf.getX_GPS();
+                gps_out.x = gps(GPSSTATE::DX);
+                gps_out.y = gps(GPSSTATE::DY);
+                //------------------------------------------------------------------
+                //------------------------------------------------------------------
+                //publish the output of the real value / referrence value
+                ekf_gps_pose_pub_ -> publish(gps_out);
+
 
             }
         }

@@ -85,6 +85,8 @@ namespace autobin
             bool initial_pose_received_{false};
 
             chcv_msgs::msg::Chcv chcv_out;
+            chcv_msgs::msg::Gnss gps_out;
+
             rclcpp::Time current_stamp_;
 
             EKF_CHCV ekf;
@@ -99,6 +101,8 @@ namespace autobin
             double pose_y_init_;
             chcv_msgs::msg::Gnss gnss_in;
 
+            Eigen::Vector2d gps;
+
 
             //subcriber
             rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_initial_pose_;
@@ -107,6 +111,9 @@ namespace autobin
 
             //Publisher
             rclcpp::Publisher<chcv_msgs::msg::Chcv>::SharedPtr ekf_pose_pub_;
+
+            rclcpp::Publisher<chcv_msgs::msg::Gnss>::SharedPtr ekf_gps_pose_pub_;
+
 
             //Timer
             rclcpp::TimerBase::SharedPtr timer_;
@@ -123,6 +130,11 @@ namespace autobin
             enum STATE
             {
                 X = 0, Y = 1, PSIS = 2, V =3,
+            };
+
+            enum GPSSTATE
+            {
+              DX = 0, DY = 1,
             };
 
     };
