@@ -73,47 +73,44 @@ namespace autobin
             explicit EKFComponent(const rclcpp::NodeOptions & options);
 
         private:
-            std::string reference_frame_id_;
-            std::string robot_frame_id_;
+
             std::string gnss_pose_topic_;
-            int pub_period_;
 
             double var_GPS_;
             Eigen::Vector2d var_R;
             
-            bool use_gnss_;
 
-            bool initial_pose_received_{false};
+            bool initialize_state_received_;
 
             chcv_msgs::msg::Chcv chcv_out;
-            chcv_msgs::msg::Gnss gps_out;
+            chcv_msgs::msg::Gnss ref_out;
             chcv_msgs::msg::Cov cov_out;
 
             rclcpp::Time current_stamp_;
 
             EKF_CHCV ekf;
 
-            nmea_msgs::msg::Gpgga current_gnss_pose_, gnss_pose_;
+            nmea_msgs::msg::Gpgga gnss_pose_;
 
             double diff_pose_latitude;
             double diff_pose_longitude;
-            double diff_latitude;
-            double diff_longitude;
-            double previous_latitude;
-            double previous_longitude;
             double previous_pose_longitude;
             double previous_pose_latitude;
             double arc;
-            double pose_x_next_;
-            double pose_y_next_;
-            chcv_msgs::msg::Gnss gnss_in;
+            double pose_x, pose_y;
+            double cumsum_x, cumsum_y;
 
-            Eigen::Vector2d gps;
+            chcv_msgs::msg::Chcv chcv_in;
+
+            Eigen::Vector4d x;
+            Eigen::Vector2d correction;
             Eigen::Vector4d covariance;
+            Eigen::Vector4d pre_state;
+            Eigen::Matrix4d P;
 
 
             //subcriber
-            rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_initial_pose_;
+            //rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_initial_pose_;
 
             rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_pose_;
 
@@ -133,7 +130,11 @@ namespace autobin
             tf2_ros::TransformListener listener_;
 
             //function
-            void ekf_prediction_correction(const chcv_msgs::msg::Gnss msg, const Eigen::Vector2d variance);
+            void initialize_state(double pose_x_, double pose_y_);
+            void convert(const nmea_msgs::msg::Gpgga::SharedPtr msg, double &pose_x, double &pose_y);
+            void cumsum(double pose_x_, double pose_y_, double &cum_pose_x_, double &cum_pose_y_);
+            void ekf_prediction(const chcv_msgs::msg::Chcv msg, Eigen::Matrix4d &P);
+            void ekf_correction(const chcv_msgs::msg::Chcv msg, const Eigen::Vector2d variance, Eigen::Matrix4d P);
             void broadcastPose();
 
             enum STATE
@@ -141,7 +142,7 @@ namespace autobin
                 X = 0, Y = 1, PSIS = 2, V =3,
             };
 
-            enum GPSSTATE
+            enum CORRECTIONSTATE
             {
               DX = 0, DY = 1,
             };

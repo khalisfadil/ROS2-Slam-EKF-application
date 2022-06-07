@@ -1,8 +1,4 @@
 ekf_localization:
     ros__parameters:
-      reference_frame_id: "map"
-      robot_frame_id: "base_link"
-      gnss_pose_topic: "gnss_pose"
-      pub_period: 10
       var_gnss: 6.0
-      use_gnss: true
+

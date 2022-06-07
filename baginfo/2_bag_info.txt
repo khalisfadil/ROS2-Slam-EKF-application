@@ -1,0 +1,55 @@
+Files:             rosbag2_2022_03_29-15_53_57_0.db3
+Bag size:          8.1 GiB
+Storage id:        sqlite3
+Duration:          174.518s
+Start:             Mar 29 2022 15:53:57.401 (1648562037.401)
+End:               Mar 29 2022 15:56:51.919 (1648562211.919)
+Messages:          1932
+Topic information: Topic: /diagnostics | Type: diagnostic_msgs/msg/DiagnosticArray | Count: 51 | Serialization Format: cdr
+                   Topic: /mono_front_right/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 51 | Serialization Format: cdr
+                   Topic: /mono_back_right/image | Type: sensor_msgs/msg/Image | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_back/image | Type: sensor_msgs/msg/Image | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_back_right/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_back_right/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_front/image | Type: sensor_msgs/msg/Image | Count: 53 | Serialization Format: cdr
+                   Topic: /mono_back/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_front_left/image | Type: sensor_msgs/msg/Image | Count: 51 | Serialization Format: cdr
+                   Topic: /radar/radar_data | Type: asv_msgs/msg/AsterixRadarVector | Count: 52 | Serialization Format: cdr
+                   Topic: /velodyne_packets | Type: velodyne_msgs/msg/VelodyneScan | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_front/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_back/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 52 | Serialization Format: cdr
+                   Topic: /mono_front_left/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 51 | Serialization Format: cdr
+                   Topic: /nerian_stereo/stereo_camera_info | Type: nerian_stereo/msg/StereoCameraInfo | Count: 0 | Serialization Format: cdr
+                   Topic: /ais/ais_msgtype_five | Type: asv_msgs/msg/AisFive | Count: 19 | Serialization Format: cdr
+                   Topic: /ais/ais_msgtype_one | Type: asv_msgs/msg/AisOne | Count: 54 | Serialization Format: cdr
+                   Topic: /nerian_stereo/right_image | Type: sensor_msgs/msg/Image | Count: 0 | Serialization Format: cdr
+                   Topic: /onboard_gps/onboard_gga | Type: nmea_msgs/msg/Gpgga | Count: 53 | Serialization Format: cdr
+                   Topic: /tf | Type: tf2_msgs/msg/TFMessage | Count: 3 | Serialization Format: cdr
+                   Topic: /onboard_gps/onboard_hdt | Type: asv_msgs/msg/Gphdt | Count: 53 | Serialization Format: cdr
+                   Topic: /nerian_stereo/left_image | Type: sensor_msgs/msg/Image | Count: 0 | Serialization Format: cdr
+                   Topic: /onboard_gps/onboard_rot | Type: asv_msgs/msg/Gprot | Count: 53 | Serialization Format: cdr
+                   Topic: /trimble_imu | Type: sensor_msgs/msg/Imu | Count: 0 | Serialization Format: cdr
+                   Topic: /rudder_control/autobin_analog | Type: asv_msgs/msg/Analog | Count: 51 | Serialization Format: cdr
+                   Topic: /imu | Type: sensor_msgs/msg/Imu | Count: 61 | Serialization Format: cdr
+                   Topic: /onboard_gps/onboard_rmc | Type: nmea_msgs/msg/Gprmc | Count: 53 | Serialization Format: cdr
+                   Topic: /nerian_stereo/disparity_map | Type: sensor_msgs/msg/Image | Count: 1 | Serialization Format: cdr
+                   Topic: /parameter_events | Type: rcl_interfaces/msg/ParameterEvent | Count: 0 | Serialization Format: cdr
+                   Topic: /mono_front_right/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 51 | Serialization Format: cdr
+                   Topic: /mono_back_left/image | Type: sensor_msgs/msg/Image | Count: 55 | Serialization Format: cdr
+                   Topic: /onboard_gps/onboard_sentence | Type: nmea_msgs/msg/Sentence | Count: 53 | Serialization Format: cdr
+                   Topic: /rosout | Type: rcl_interfaces/msg/Log | Count: 0 | Serialization Format: cdr
+                   Topic: /nerian_stereo/point_cloud | Type: sensor_msgs/msg/PointCloud2 | Count: 0 | Serialization Format: cdr
+                   Topic: /mono_front_left/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 52 | Serialization Format: cdr
+                   Topic: /trimble_rot | Type: asv_msgs/msg/Gprot | Count: 54 | Serialization Format: cdr
+                   Topic: /rpm_motor/motor_rpm | Type: std_msgs/msg/Float32 | Count: 53 | Serialization Format: cdr
+                   Topic: /trimble_rmc | Type: nmea_msgs/msg/Gprmc | Count: 54 | Serialization Format: cdr
+                   Topic: /ouster_driver/transition_event | Type: lifecycle_msgs/msg/TransitionEvent | Count: 0 | Serialization Format: cdr
+                   Topic: /trimble_sentence | Type: nmea_msgs/msg/Sentence | Count: 57 | Serialization Format: cdr
+                   Topic: /trimble_hdt | Type: asv_msgs/msg/Gphdt | Count: 54 | Serialization Format: cdr
+                   Topic: /tf_static | Type: tf2_msgs/msg/TFMessage | Count: 1 | Serialization Format: cdr
+                   Topic: /trimble_gga | Type: nmea_msgs/msg/Gpgga | Count: 54 | Serialization Format: cdr
+                   Topic: /points | Type: sensor_msgs/msg/PointCloud2 | Count: 54 | Serialization Format: cdr
+                   Topic: /mono_front_right/image | Type: sensor_msgs/msg/Image | Count: 51 | Serialization Format: cdr
+                   Topic: /mono_front/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 53 | Serialization Format: cdr
+                   Topic: /mono_back_left/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 55 | Serialization Format: cdr
+                   Topic: /mono_back_left/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 55 | Serialization Format: cdr

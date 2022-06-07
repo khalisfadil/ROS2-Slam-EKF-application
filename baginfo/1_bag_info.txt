@@ -1,0 +1,43 @@
+Files:             rosbag2_2022_04_13-13_42_30_0.db3
+Bag size:          285.0 GiB
+Storage id:        sqlite3
+Duration:          7212.327s
+Start:             Apr 13 2022 13:42:30.419 (1649850150.419)
+End:               Apr 13 2022 15:42:42.746 (1649857362.746)
+Messages:          54709
+Topic information: Topic: /ouster/imu | Type: sensor_msgs/msg/Imu | Count: 1865 | Serialization Format: cdr
+                   Topic: /mono_front_left/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 1860 | Serialization Format: cdr
+                   Topic: /mono_back/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 1862 | Serialization Format: cdr
+                   Topic: /diagnostics | Type: diagnostic_msgs/msg/DiagnosticArray | Count: 1860 | Serialization Format: cdr
+                   Topic: /mono_back/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 1861 | Serialization Format: cdr
+                   Topic: /trimble/trimble_rot | Type: asv_msgs/msg/Gprot | Count: 1859 | Serialization Format: cdr
+                   Topic: /rudder_control/autobin_analog | Type: asv_msgs/msg/Analog | Count: 1860 | Serialization Format: cdr
+                   Topic: /trimble/trimble_sentence | Type: nmea_msgs/msg/Sentence | Count: 1860 | Serialization Format: cdr
+                   Topic: /mono_front/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 1861 | Serialization Format: cdr
+                   Topic: /mono_front_right/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 1860 | Serialization Format: cdr
+                   Topic: /mono_back_left/image | Type: sensor_msgs/msg/Image | Count: 1862 | Serialization Format: cdr
+                   Topic: /parameter_events | Type: rcl_interfaces/msg/ParameterEvent | Count: 0 | Serialization Format: cdr
+                   Topic: /ouster/points | Type: sensor_msgs/msg/PointCloud2 | Count: 1862 | Serialization Format: cdr
+                   Topic: /mono_back_right/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 1862 | Serialization Format: cdr
+                   Topic: /rpm_motor/motor_rpm | Type: std_msgs/msg/Float32 | Count: 1861 | Serialization Format: cdr
+                   Topic: /trimble/trimble_gga | Type: nmea_msgs/msg/Gpgga | Count: 1860 | Serialization Format: cdr
+                   Topic: /mono_front/image | Type: sensor_msgs/msg/Image | Count: 1862 | Serialization Format: cdr
+                   Topic: /mono_back_right/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 1862 | Serialization Format: cdr
+                   Topic: /rosout | Type: rcl_interfaces/msg/Log | Count: 1873 | Serialization Format: cdr
+                   Topic: /trimble/trimble_hdt | Type: asv_msgs/msg/Gphdt | Count: 1860 | Serialization Format: cdr
+                   Topic: /mono_front_left/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 1860 | Serialization Format: cdr
+                   Topic: /ouster/ouster_driver/transition_event | Type: lifecycle_msgs/msg/TransitionEvent | Count: 0 | Serialization Format: cdr
+                   Topic: /tf_static | Type: tf2_msgs/msg/TFMessage | Count: 1 | Serialization Format: cdr
+                   Topic: /trimble/trimble_rmc | Type: nmea_msgs/msg/Gprmc | Count: 1860 | Serialization Format: cdr
+                   Topic: /velodyne_points | Type: sensor_msgs/msg/PointCloud2 | Count: 0 | Serialization Format: cdr
+                   Topic: /mono_front_left/image | Type: sensor_msgs/msg/Image | Count: 1860 | Serialization Format: cdr
+                   Topic: /radar/radar_data | Type: asv_msgs/msg/AsterixRadarVector | Count: 727 | Serialization Format: cdr
+                   Topic: /velodyne_packets | Type: velodyne_msgs/msg/VelodyneScan | Count: 0 | Serialization Format: cdr
+                   Topic: /mono_back_left/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 1861 | Serialization Format: cdr
+                   Topic: /trimble/trimble_imu | Type: sensor_msgs/msg/Imu | Count: 0 | Serialization Format: cdr
+                   Topic: /mono_front/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 1861 | Serialization Format: cdr
+                   Topic: /mono_front_right/image | Type: sensor_msgs/msg/Image | Count: 1861 | Serialization Format: cdr
+                   Topic: /mono_back_right/image | Type: sensor_msgs/msg/Image | Count: 1862 | Serialization Format: cdr
+                   Topic: /mono_back/image | Type: sensor_msgs/msg/Image | Count: 1862 | Serialization Format: cdr
+                   Topic: /mono_back_left/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 1861 | Serialization Format: cdr
+                   Topic: /mono_front_right/exposure_time_abs | Type: asv_msgs/msg/ExposureTimeAbs | Count: 1861 | Serialization Format: cdr
