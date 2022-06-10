@@ -79,43 +79,56 @@ namespace autobin
             double var_GPS_;
             Eigen::Vector2d var_R;
             
-
+            //auto ekf_callback
             bool initialize_state_received_;
+            chcv_msgs::msg::Chcv chcv_in;
+            Eigen::Matrix4d init_p_out_, p_predict_in, p_predict_out, p_correct_in, p_correct_out;
+            Eigen::Vector4d init_x_out_, x_predict_in, x_predict_out, x_correct_in, x_correct_out;
+            int i = 0;
 
-            chcv_msgs::msg::Chcv chcv_out;
-            chcv_msgs::msg::Gnss ref_out;
+
+
+            //void EKFComponent::broadcastPose()
+            chcv_msgs::msg::Chcv chcv_predict_out;
+            chcv_msgs::msg::Chcv chcv_correct_out;
             chcv_msgs::msg::Cov cov_out;
+            chcv_msgs::msg::Gnss gps_pose_out;
 
             rclcpp::Time current_stamp_;
 
+            //class EKFKITTI_CHCV from ekf_kitti.hpp
             EKF_CHCV ekf;
 
+            //topic name of gnss pose subs
             nmea_msgs::msg::Gpgga gnss_pose_;
 
+            //void EKFComponent::convert
             double diff_pose_latitude;
             double diff_pose_longitude;
             double previous_pose_longitude;
             double previous_pose_latitude;
             double arc;
             double pose_x, pose_y;
+
+            //void EKFComponent::cumsum
             double cumsum_x, cumsum_y;
 
-            chcv_msgs::msg::Chcv chcv_in;
+            //void EKFComponent::ekf_prediction
+            long double previous_stamp_gnss;
 
+            //EKFCOMPONENT::ekf_callback
             Eigen::Vector4d x;
-            Eigen::Vector2d correction;
-            Eigen::Vector4d covariance;
-            Eigen::Vector4d pre_state;
-            Eigen::Matrix4d P;
-
-
+            Eigen::Matrix4d p;
+            Eigen::Vector2d cumsum_vec;
+            
             //subcriber
-            //rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_initial_pose_;
 
             rclcpp::Subscription<nmea_msgs::msg::Gpgga>::SharedPtr sub_gnss_pose_;
 
             //Publisher
-            rclcpp::Publisher<chcv_msgs::msg::Chcv>::SharedPtr ekf_pose_pub_;
+            rclcpp::Publisher<chcv_msgs::msg::Chcv>::SharedPtr ekf_predict_pub_;
+
+            rclcpp::Publisher<chcv_msgs::msg::Chcv>::SharedPtr ekf_correct_pub_;
 
             rclcpp::Publisher<chcv_msgs::msg::Gnss>::SharedPtr ekf_gps_pose_pub_;
 
@@ -129,27 +142,33 @@ namespace autobin
             tf2_ros::Buffer tfbuffer_;
             tf2_ros::TransformListener listener_;
 
-            //function
-            void initialize_state(double pose_x_, double pose_y_);
+            //function //TODO UPDATE FUNCTION
+            void initialize_state(double pose_x_, double pose_y_, Eigen::Vector4d &X_init_out, Eigen::Matrix4d &P_init_out);
             void convert(const nmea_msgs::msg::Gpgga::SharedPtr msg, double &pose_x, double &pose_y);
             void cumsum(double pose_x_, double pose_y_, double &cum_pose_x_, double &cum_pose_y_);
-            void ekf_prediction(const chcv_msgs::msg::Chcv msg, Eigen::Matrix4d &P);
-            void ekf_correction(const chcv_msgs::msg::Chcv msg, const Eigen::Vector2d variance, Eigen::Matrix4d P);
+            void ekf_prediction(const chcv_msgs::msg::Chcv msg, Eigen::Vector4d x_in, Eigen::Matrix4d p_in, Eigen::Vector4d &x_out, Eigen::Matrix4d &p_out);
+            void ekf_correction(const Eigen::Vector2d variance, Eigen::Vector2d correction_state, Eigen::Vector4d x_cor_in, Eigen::Matrix4d p_cor_in, Eigen::Vector4d &x_cor_out, Eigen::Matrix4d &p_cor_out);
             void broadcastPose();
 
             enum STATE
             {
-                X = 0, Y = 1, PSIS = 2, V =3,
+                X =  0 , Y = 1 , PSIS = 2 , V = 3
+            };
+
+
+            enum PREDICTIONSTATE
+            {
+                X_ =  0 , Y_ = 1 , PSIS_ = 2 , V_ = 3
             };
 
             enum CORRECTIONSTATE
             {
-              DX = 0, DY = 1,
+                DX = 0 , DY = 1, DPSIS = 2, DV = 3
             };
 
             enum COVARIANCESTATE
             {
-              P1 = 0, P2 = 1, P3 = 2, P4 = 3
+                P1 = 0, P2 = 1, P3 = 2, P4 = 3
             };
 
     };

@@ -47,11 +47,11 @@ namespace autobin
                 if(!initialize_state_received_)
                 {
 
-                    initialize_state(pose_x, pose_y, init_x_out, init_p_out); //declare x and p globally
+                    initialize_state(pose_x, pose_y, init_x_out_, init_p_out_); //declare x and p globally
                     
-                    x = init_x_out;
+                    x = init_x_out_;
 
-                    p = init_p_out;
+                    p = init_p_out_;
 
                     chcv_in.x = x(0);
                     chcv_in.y = x(1);
@@ -60,20 +60,19 @@ namespace autobin
 
                     initialize_state_received_ = true;
 
+                    broadcastPose();
+
                 }else if(initialize_state_received_)
                 {
                     //x << cumsum_x, cumsum_y, x(2), x(3);
 
                     chcv_in.header.stamp = msg->header.stamp; 
                     //x vector is declared globally
-                    chcv_in.x = x(0);
-                    chcv_in.y = x(1);
-                    chcv_in.psis = x(2);
-                    chcv_in.v = x(3);
+                    x_predict_in = x;
 
                     p_predict_in = p;
 
-                    ekf_prediction(chcv_in, p_predict_in, x_predict_out, p_predict_out);
+                    ekf_prediction(chcv_in, x_predict_in, p_predict_in, x_predict_out, p_predict_out);
 
                     p_correct_in = p_predict_out;
 
@@ -84,19 +83,23 @@ namespace autobin
                     p = p_correct_out;
 
                     x = x_correct_out;
+
+                    broadcastPose();
+
+                    //checking the matrix
+
+                    i++; 
+
+                    std::cout <<"============================================================================"<< std::endl;
+                    std::cout <<"=================================ekf callback==============================="<< std::endl;
+                    std::cout <<"STEP:  "<< i << std::endl;
+                    std::cout <<"                                                                            " <<std::endl;
+                    std::cout <<"X_in:  " << x_predict_in(0) << "    " <<"Y_in:  " << x_predict_in(1) << "    " << "Yaw_in: " << x_predict_in(2) << "     " << "V_in:   " << x_predict_in(3) << std::endl; 
+                    std::cout <<"X_out:  " << x(0) << "    " <<"Y_out:  " << x(1) << "    " << "Yaw_out: " << x(2) << "     " << "V_out:   " << x(3) << std::endl;                  
+                    std::cout <<"P1: " <<  p(0,0) << "    " << "P2:  " << p(1,1)<< "    " << "P3:  " << p(2,2) << "    " << "P4:  " << p(3,3) << std::endl;
+                    std::cout <<"============================================================================"<< std::endl;
+
                 }
-
-                int i++; //step 1 nad step 2 the x should be the same
-
-                std::cout <<"============================================================================"<< std::endl;
-                std::cout <<"=================================ekf callback==============================="<< std::endl;
-                std::cout <<"STEP:  "<< i << std::endl;
-                std::cout <<"x:  " << chcv_in.x << "    " <<"y:  " << chcv_in.y << "    " << "psis: " << chcv_in.psis << "     " << "v:   " << chcv_in.v << std::endl;             
-                std::cout <<"x(0): " <<  x(0) << "    " << "x(1):  " << x(1)<< "    " << "x(2):  " << x(2) << "    " << "x(3):  " << x(3) << std::endl;      
-                std::cout <<"p(0,0): " <<  p(0,0) << "    " << "p(1,1):  " << p(1,1)<< "    " << "p(2,2):  " << p(2,2) << "    " << "p(3,3):  " << p(3,3) << std::endl;
-                std::cout <<"============================================================================"<< std::endl;
-                
-                return p;
 
             };
 
@@ -171,7 +174,7 @@ namespace autobin
         //------------------------------------------------------------------
         //this funciton is to calculate the prediction from kalman filtering
         //------------------------------------------------------------------
-        void EKFKITTIComponent::ekf_prediction(const chcv_msgs::msg::Chcv msg, Eigen::Matrix4d p_in, Eigen::Vector4d &x_out, Eigen::Matrix4d &p_out)
+        void EKFKITTIComponent::ekf_prediction(const chcv_msgs::msg::Chcv msg, Eigen::Vector4d x_in, Eigen::Matrix4d p_in, Eigen::Vector4d &x_out, Eigen::Matrix4d &p_out)
         {
             current_stamp_ = msg.header.stamp;
 
@@ -179,16 +182,11 @@ namespace autobin
 
             if(previous_stamp_gnss == 0)
             {
-                previous_stamp_gnss = currrent_stamp_gnss;
-            }else{
-                previous_stamp_gnss = previous_stamp_gnss;
+                previous_stamp_gnss = current_stamp_gnss;
             }
 
             long double dt = current_stamp_gnss - previous_stamp_gnss;
-
-            Eigen::Vector4d x_in;
-
-            x_in << msg.x, msg.y, msg.psis, msg.v;
+            previous_stamp_gnss = current_stamp_gnss;
 
             ekf.predict(dt, x_in, p_in, x_out, p_out);
         }
@@ -241,6 +239,11 @@ namespace autobin
             ekf_cov_pub_ -> publish(cov_out);
 
             //TODO GNSS POSE PUB
+            gps_pose_out.header.stamp = current_stamp_;
+            gps_pose_out.x = cumsum_x;
+            gps_pose_out.y = cumsum_y;
+            //publish gps pose
+            ekf_gps_pose_pub_ -> publish(gps_pose_out);
 
         }
         
@@ -249,4 +252,4 @@ namespace autobin
             
 }
 
-RCLCPp_COMPONENTS_REGISTER_NODE(autobin::EKFKITTIComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(autobin::EKFKITTIComponent)

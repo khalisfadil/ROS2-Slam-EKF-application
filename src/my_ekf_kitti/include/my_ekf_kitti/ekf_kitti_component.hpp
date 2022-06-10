@@ -81,11 +81,17 @@ namespace autobin
             //auto ekf_callback
             bool initialize_state_received_;
             chcv_msgs::msg::Chcv chcv_in;
+            Eigen::Matrix4d init_p_out_, p_predict_in, p_predict_out, p_correct_in, p_correct_out;
+            Eigen::Vector4d init_x_out_, x_predict_in, x_predict_out, x_correct_in, x_correct_out;
+            int i = 0;
+
+
 
             //void EKFKITTIComponent::broadcastPose()
             chcv_msgs::msg::Chcv chcv_predict_out;
-            chcv_msgs::msg::Gnss chcv_correct_out;
+            chcv_msgs::msg::Chcv chcv_correct_out;
             chcv_msgs::msg::Cov cov_out;
+            chcv_msgs::msg::Gnss gps_pose_out;
 
             rclcpp::Time current_stamp_;
 
@@ -136,11 +142,11 @@ namespace autobin
             tf2_ros::TransformListener listener_;
 
             //function //TODO UPDATE FUNCTION
-            void initialize_state(double pose_x_, double pose_y_);
+            void initialize_state(double pose_x_, double pose_y_, Eigen::Vector4d &X_init_out, Eigen::Matrix4d &P_init_out);
             void convert(const sensor_msgs::msg::NavSatFix::SharedPtr msg, double &pose_x, double &pose_y);
             void cumsum(double pose_x_, double pose_y_, double &cum_pose_x_, double &cum_pose_y_);
-            void ekf_prediction(const chcv_msgs::msg::Chcv msg, Eigen::Matrix4d &P);
-            void ekf_correction(const chcv_msgs::msg::Chcv msg, const Eigen::Vector2d variance, Eigen::Matrix4d P);
+            void ekf_prediction(const chcv_msgs::msg::Chcv msg, Eigen::Vector4d x_in, Eigen::Matrix4d p_in, Eigen::Vector4d &x_out, Eigen::Matrix4d &p_out);
+            void ekf_correction(const Eigen::Vector2d variance, Eigen::Vector2d correction_state, Eigen::Vector4d x_cor_in, Eigen::Matrix4d p_cor_in, Eigen::Vector4d &x_cor_out, Eigen::Matrix4d &p_cor_out);
             void broadcastPose();
 
             enum STATE
