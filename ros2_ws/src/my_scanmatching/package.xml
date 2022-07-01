@@ -22,6 +22,7 @@
   <depend>ndt_omp_ros2</depend>
   <depend>libg2o</depend>
   <depend>libpcl-all-dev</depend>
+  <depend>lidarslam_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

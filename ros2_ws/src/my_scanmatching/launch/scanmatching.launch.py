@@ -18,7 +18,7 @@ def generate_launch_description():
         package='my_scanmatching',
         executable='scanmatching_node',
         parameters=[scanmatching_param_dir],
-        remappings=[('cloud_topic','/front_lidar'),('odom_topic','/odom')],
+        remappings=[('cloud_topic','front_lidar'),('odom_topic','/odom')],
         output='screen'
         )
 

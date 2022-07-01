@@ -62,6 +62,7 @@ extern "C" {
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <nav_msgs/msg/path.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <lidarslam_msgs/msg/map_array.hpp>
 
 #include <pclomp/ndt_omp.h>
 #include <pclomp/ndt_omp_impl.hpp>
@@ -71,6 +72,11 @@ extern "C" {
 #include <pclomp/gicp_omp_impl.hpp>
 
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/registration/icp.h>
+#include <pcl/registration/gicp.h>
+#include <pcl/registration/ndt.h>
 
 #include <mutex>
 #include <thread>
@@ -86,7 +92,7 @@ namespace autobin
             explicit ScanmatchingComponent(const rclcpp::NodeOptions & options);
 
         private:
-            rclcpp::Clock clock;
+            rclcpp::Clock clock_;
             tf2_ros::Buffer tfbuffer;
             tf2_ros::TransformListener listener;
             tf2_ros::TransformBroadcaster broadcaster;
@@ -110,12 +116,50 @@ namespace autobin
 
             rclcpp::Subscription <sensor_msgs::msg::PointCloud2>::SharedPtr sub_cloud_input;
 
+            rclcpp::Subscription <geometry_msgs::msg::PoseStamped>::SharedPtr sub_geo_pose;
+
             //Publisher
             rclcpp::Publisher <geometry_msgs::msg::PoseStamped>::SharedPtr pub_pose;
 
             rclcpp::Publisher <nav_msgs::msg::Path>::SharedPtr pub_path;
 
             rclcpp::Publisher <geometry_msgs::msg::PoseStamped>::SharedPtr pub_ref_pose;
+
+            rclcpp::Publisher < sensor_msgs::msg::PointCloud2 > ::SharedPtr pub_map;
+
+            rclcpp::Publisher < lidarslam_msgs::msg::MapArray > ::SharedPtr pub_map_array;
+
+            //map array
+            std::mutex mtx_;
+
+            pcl::PointCloud < pcl::PointXYZI > targeted_cloud;
+
+            rclcpp::Time last_map_time;
+
+            bool mapping_flag {false};
+
+            bool is_map_updated {false};
+
+            std::thread mapping_thread;
+
+            std::packaged_task < void() > mapping_task;
+
+            std::future < void > mapping_future;
+
+            int num_targeted_cloud;
+
+            double map_publish_period;
+
+            double trans_for_mapupdate;
+
+            double scan_period_ {0.1};
+
+            // map
+            Eigen::Vector3d previous_position;
+
+            double trans;
+
+            double latest_distance {0};
 
             //msg
             geometry_msgs::msg::PoseStamped current_pose;
@@ -128,12 +172,18 @@ namespace autobin
 
             nav_msgs::msg::Odometry odom_ref_pose_msg;
 
+            lidarslam_msgs::msg::MapArray map_array_msg_;
+
             //function 
             void process_cloud(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &cloud_in, const rclcpp::Time stamp);
 
-            void get_pose(const Eigen::Matrix4f final_transformation, const rclcpp::Time stamp);
+            void get_pose(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &cloud_in, const Eigen::Matrix4f final_transformation, const rclcpp::Time stamp);
 
-            void ekf_scanmatching(Eigen::Vector3d translation_vector, const rclcpp::Time stamp, Eigen::Vector4d x);
+            void ekf_scanmatching(Eigen::Vector3d translation_vector,const double yaw, const rclcpp::Time stamp, Eigen::Matrix<double, 6, 1> x_out);
+
+            void update(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr cloud_in, const Eigen::Matrix4f final_transformation, const geometry_msgs::msg::PoseStamped current_pose_stamped);
+
+            void publishMap();
 
             Eigen::Matrix4f getTransformation(const geometry_msgs::msg::Pose pose);
 
@@ -150,20 +200,25 @@ namespace autobin
 
             //setting parameter
 
-            double roll,pitch,yaw;
-
             double vg_size_;
 
             double R_variance_;
 
             //component
-            Eigen::Vector4d x;
 
-            Eigen::Matrix4d p;
+            Eigen::Vector3d translation_vector;
 
-            Eigen::Vector2d cumsum_vector;
+            Eigen::Matrix3d rotation_matrix;
 
-            Eigen::Vector2d var_R;
+            Eigen::Matrix<double, 6, 1> x;
+
+            Eigen::Matrix<double, 6, 1> x_out;
+
+            Eigen::Matrix<double, 6, 6> p;
+
+            Eigen::Matrix<double, 3, 1> measurement_vector;
+
+            Eigen::Matrix<double, 3, 1> var_R;
 
             double cum_pose_x, cum_pose_y;
 
@@ -175,9 +230,9 @@ namespace autobin
 
             double previous_trans_pose_x, previous_trans_pose_y;
 
-            Eigen::Matrix4d init_p_out_, p_predict_in, p_predict_out, p_correct_in, p_correct_out;
+            Eigen::Matrix<double, 6, 6> init_p_out_, p_predict_in, p_predict_out, p_correct_in, p_correct_out;
 
-            Eigen::Vector4d init_x_out_, x_predict_in, x_predict_out, x_correct_in, x_correct_out;
+            Eigen::Matrix<double, 6, 1> init_x_out_, x_predict_in, x_predict_out, x_correct_in, x_correct_out;
 
             int i = 0;
             int u = 0;

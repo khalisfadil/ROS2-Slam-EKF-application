@@ -3,12 +3,15 @@ scan_matching:
     global_frame_id: "map"
     robot_frame_id: "base_link"
     lidar_frame_id: "front_lidar"
-    registration_method: "NDT"
-    ndt_resolution: 1.0
+    registration_method: "NDT_OMP"
+    ndt_resolution: 10.0
     ndt_num_threads: 5
     gicp_corr_dist_threshold: 5.0
     vg_size: 1.0
     R_variance: 6.0
+    num_targeted_cloud: 500
+    scan_period: 0.01
+    map_publish_period: 15.0
     use_ekf: true
     neglect_roll_pitch_z: true
 
