@@ -1,5 +1,5 @@
-#ifndef AUTOBIN__MS_EKF_HPP_
-#define AUTOBIN__MS_EKF_HPP_
+#ifndef AUTOBIN__MSCHCV_EKF_HPP_
+#define AUTOBIN__MSCHCV_EKF_HPP_
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
@@ -10,24 +10,21 @@ class MY_SCANMATCHING_EKF
     public:
 
 
-        void initialize_state( double x, double y, double yaw, Eigen::Matrix<double, 8, 1> &init_x_out, Eigen::Matrix<double, 8, 8> &init_p_out)
+        void initialize_state( double x, double y, double yaw, Eigen::Matrix<double, 6, 1> &init_x_out, Eigen::Matrix<double, 6, 6> &init_p_out)
         {
             //initializinh state_x
             init_x_out(0,0) = x; // = 0
             init_x_out(1,0) = y; // = 0
             init_x_out(2,0) = 0.0; //90 degress
             init_x_out(3,0) = 0.0;
-            init_x_out(4,0) = 0.0;
-            init_x_out(5,0) = 0.0;
-            init_x_out(6,0) = yaw;
-            init_x_out(7,0) = 0;
+            init_x_out(4,0) = yaw;
+            init_x_out(5,0) = 0;
 
             //initialiting state P
-            Eigen::Matrix<double, 8, 8> P;
+            Eigen::Matrix<double, 6, 6> P;
             P.block<2,2>(0,0) = Eigen::Matrix<double, 2,2>::Identity()*10;
-            P.block<2,2>(2,2) = Eigen::Matrix<double, 2,2>::Identity()*10;
+            P.block<2,2>(2,2) = Eigen::Matrix<double, 2,2>::Identity()*1;
             P.block<2,2>(4,4) = Eigen::Matrix<double, 2,2>::Identity()*1;
-            P.block<2,2>(6,6) = Eigen::Matrix<double, 2,2>::Identity()*1;
 
             init_p_out= P;
 
@@ -40,39 +37,35 @@ class MY_SCANMATCHING_EKF
             std::cout <<"============================================================================"<< std::endl;*/
         }
         
-        void prediction(long double dt, Eigen::Matrix<double, 8, 1> X_in, Eigen::Matrix<double, 8, 8> P_in, Eigen::Matrix<double, 8, 1> &X_out, Eigen::Matrix<double, 8, 8> &P_out)//kena masukkan value jangan pakai STATE!!!
+        void prediction(long double dt, Eigen::Matrix<double, 6, 1> X_in, Eigen::Matrix<double, 6, 6> P_in, Eigen::Matrix<double, 6, 1> &X_out, Eigen::Matrix<double, 6, 6> &P_out)//kena masukkan value jangan pakai STATE!!!
         {   
             //Prediction
             //=======================
             //derive for the dynamic matrix of A [JA] by using the state vector [state_x]
 
-            Eigen::Matrix<double,8 ,8> A;
+            Eigen::Matrix<double,6 ,6> A;
             
-            A << 1, 0, dt, 0, (1/2)*pow(dt,2), 0, 0, 0,
-                0, 1, 0, dt, 0, (1/2)*pow(dt,2), 0, 0,
-                0, 0, 1, 0, dt, 0, 0, 0,
-                0, 0, 0, 1, 0, dt, 0, 0,
-                0, 0, 0, 0, 1, 0, 0, 0,
-                0, 0, 0, 0, 0, 1, 0, 0,
-                0, 0, 0, 0, 0, 0, 1, dt,
-                0, 0, 0, 0, 0, 0, 0, 1;
+            A << 1, 0, dt, 0, 0, 0,
+                0, 1, 0, dt, 0, 0,
+                0, 0, 1, 0, 0, 0,
+                0, 0, 0, 1, 0, 0,
+                0, 0, 0, 0, 1, dt,
+                0, 0, 0, 0, 0, 1;
 
             X_in = A * X_in;
 
             //calculation of noise covariance matrix Q
             double sj = 0.1;
 
-            Eigen::Matrix<double, 8, 8> q;
-            Eigen::Matrix<double, 8, 8> Q;
+            Eigen::Matrix<double, 6, 6> q;
+            Eigen::Matrix<double, 6, 6> Q;
 
-            q << pow(dt,6)/36, 0, pow(dt,5)/12, 0, pow(dt,4)/6, 0, 0, 0,
-                0, pow(dt,6)/36, 0, pow(dt,5)/12, 0, pow(dt,4)/6, 0, 0,
-                pow(dt,5)/12, 0, pow(dt,4)/4, 0, pow(dt,3)/2, 0, 0, 0,
-                0, pow(dt,5)/12, 0, pow(dt,4)/4, 0, pow(dt,3)/2, 0, 0,
-                pow(dt,4)/6, 0, pow(dt,3)/2, 0, pow(dt,2), 0, 0, 0,
-                0, pow(dt,4)/6, 0, pow(dt,3)/2, 0, pow(dt,2), 0, 0,
-                0, 0, 0, 0, 0, 0, 1, 1,
-                0, 0, 0, 0, 0, 0, 1, 1;
+            q << pow(dt,6)/36, 0, pow(dt,5)/12, 0, 0, 0,
+                0, pow(dt,6)/36, 0, pow(dt,5)/12, 0, 0,
+                pow(dt,5)/12, 0, pow(dt,4)/4, 0, 0, 0,
+                0, pow(dt,5)/12, 0, pow(dt,4)/4, 0, 0,
+                0, 0, 0, 0, 1, 1,
+                0, 0, 0, 0, 1, 1;
 
             Q = q * sj;
 
@@ -103,7 +96,7 @@ class MY_SCANMATCHING_EKF
             */
         }
 
-        void correction(const Eigen::Matrix<double, 3, 1> var, Eigen::Matrix<double, 3, 1> cor_state, Eigen::Matrix<double, 8, 1> X_in_, Eigen::Matrix<double, 8, 8> P_in_, Eigen::Matrix<double, 8, 1> &X_out_, Eigen::Matrix<double, 8, 8> &P_out_)
+        void correction(const Eigen::Matrix<double, 3, 1> var, Eigen::Matrix<double, 3, 1> cor_state, Eigen::Matrix<double, 6, 1> X_in_, Eigen::Matrix<double, 6, 6> P_in_, Eigen::Matrix<double, 6, 1> &X_out_, Eigen::Matrix<double, 6, 6> &P_out_)
         {
             //Correction
             //=============================
@@ -123,18 +116,18 @@ class MY_SCANMATCHING_EKF
             Z << cor_state(0,0), cor_state(1,0), cor_state(2,0); //GPS input state x and y //cumsum
 
             //declare identity matrix
-            Eigen::Matrix<double, 8, 8> I = Eigen::Matrix<double, 8, 8>::Identity();
+            Eigen::Matrix<double, 6, 6> I = Eigen::Matrix<double, 6, 6>::Identity();
             
             
             //define JH jacobian of H //maybe put it outside
         
-            Eigen::Matrix<double, 3, 8> H;
+            Eigen::Matrix<double, 3, 6> H;
             
             //JH.block<2,2>(0,0) = Eigen::Matrix2d::Identity();
             //size JH 3x6
-            H << 1, 0, 0, 0, 0, 0, 0, 0,
-                0, 1, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 1, 0;
+            H << 1, 0, 0, 0, 0, 0,
+                0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0;
 
             //compute the Kalman gain
 
@@ -144,7 +137,7 @@ class MY_SCANMATCHING_EKF
 
             Eigen::Matrix<double, 3, 1> Y = Z - (H * X_in_); //vector 3x1;
 
-            Eigen::Matrix<double, 8, 1> ES = K * Y; // 8x3 * 3x1 = 5x1
+            Eigen::Matrix<double, 6, 1> ES = K * Y; // 8x3 * 3x1 = 5x1
 
             //update the value of latest state x [state_x]
             X_in_ = X_in_ + ES;
@@ -181,4 +174,4 @@ class MY_SCANMATCHING_EKF
 
 };
 
-#endif  // AUTOBIN__MS_EKF_HPP_
+#endif  // AUTOBIN__MSCHCV_EKF_HPP_

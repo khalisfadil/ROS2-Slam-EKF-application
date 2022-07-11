@@ -10,13 +10,13 @@ def generate_launch_description():
     scanmatching_param_dir = launch.substitutions.LaunchConfiguration(
         'scanmatching_param_dir',
         default=os.path.join(
-            get_package_share_directory('my_scanmatching'),
+            get_package_share_directory('my_scanmatching_model_chcv'),
             'param',
             'scanmatching.yaml'))
 
     scanmatching = launch_ros.actions.Node(
-        package='my_scanmatching',
-        executable='scanmatching_node',
+        package='my_scanmatching_model_chcv',
+        executable='scanmatching_model_chcv_node',
         parameters=[scanmatching_param_dir],
         remappings=[('cloud_topic','front_lidar'),('odom_topic','/odom')],
         output='screen'
@@ -26,13 +26,7 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         arguments=['52','0','0','0','0','0.9981347984218669','-0.044','base_link','front_lidar']
-        #arguments=['0','0','0','0','0','0.059219260491641','0.998244999580175','map','odom']
         )
-    #tf2 = launch_ros.actions.Node(
-    #    package='tf2_ros',
-    #    executable='static_transform_publisher',
-    #    arguments=['0','0','0','0','0','-0.059219260491641','0.998244999580175','map','odom']
-    #    )
         
 
     return launch.LaunchDescription([
@@ -41,6 +35,5 @@ def generate_launch_description():
             default_value=scanmatching_param_dir,
             description='Full path to main parameter file to load'),
         tf,
-        #tf2,
         scanmatching,
             ])

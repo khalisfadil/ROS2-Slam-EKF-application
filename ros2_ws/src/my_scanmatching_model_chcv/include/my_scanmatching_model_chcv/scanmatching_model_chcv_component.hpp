@@ -1,5 +1,5 @@
-#ifndef AUTOBIN__SM_COMPONENT_HPP_
-#define AUTOBIN__SM_COMPONENT_HPP_
+#ifndef AUTOBIN__SMCHCV_COMPONENT_HPP_
+#define AUTOBIN__SMCHCV_COMPONENT_HPP_
 
 #if __cplusplus
 extern "C" {
@@ -9,37 +9,37 @@ extern "C" {
 // demos/composition/include/composition/visibility_control.h at https://github.com/ros2/demos
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef __GNUC__
-    #define A_SMC_EXPORT __attribute__ ((dllexport))
-    #define A_SMC_IMPORT __attribute__ ((dllimport))
+    #define A_SMCHCV_EXPORT __attribute__ ((dllexport))
+    #define A_SMCHCV_IMPORT __attribute__ ((dllimport))
   #else
-    #define A_SMC_EXPORT __declspec(dllexport)
-    #define A_SMC_IMPORT __declspec(dllimport)
+    #define A_SMCHCV_EXPORT __declspec(dllexport)
+    #define A_SMCHCV_IMPORT __declspec(dllimport)
   #endif
-  #ifdef A_SMC_BUILDING_DLL
-    #define A_SMC_PUBLIC A_SMC_EXPORT
+  #ifdef A_SMCHCV_BUILDING_DLL
+    #define A_SMCHCV_PUBLIC A_SMCHCV_EXPORT
   #else
-    #define A_SMC_PUBLIC A_SMC_IMPORT
+    #define A_SMCHCV_PUBLIC A_SMCHCV_IMPORT
   #endif
-  #define A_SMC_PUBLIC_TYPE A_SMC_PUBLIC
-  #define A_SMC_LOCAL
+  #define A_SMCHCV_PUBLIC_TYPE A_SMCHCV_PUBLIC
+  #define A_SMCHCV_LOCAL
 #else
-  #define A_SMC_EXPORT __attribute__ ((visibility("default")))
-  #define A_SMC_IMPORT
+  #define A_SMCHCV_EXPORT __attribute__ ((visibility("default")))
+  #define A_SMCHCV_IMPORT
   #if __GNUC__ >= 4
-    #define A_SMC_PUBLIC __attribute__ ((visibility("default")))
-    #define A_SMC_LOCAL  __attribute__ ((visibility("hidden")))
+    #define A_SMCHCV_PUBLIC __attribute__ ((visibility("default")))
+    #define A_SMCHCV_LOCAL  __attribute__ ((visibility("hidden")))
   #else
-    #define A_SMC_PUBLIC
-    #define A_SMC_LOCAL
+    #define A_SMCHCV_PUBLIC
+    #define A_SMCHCV_LOCAL
   #endif
-  #define A_SMC_PUBLIC_TYPE
+  #define A_SMCHCV_PUBLIC_TYPE
 #endif
 
 #if __cplusplus
 }  // extern "C"
 #endif
 
-#include <my_scanmatching/my_scanmatching_ekf.hpp>
+#include <my_scanmatching_model_chcv/scanmatching_model_chcv_ekf.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <rclcpp_components/register_node_macro.hpp>
@@ -88,7 +88,7 @@ namespace autobin
     class ScanmatchingComponent : public rclcpp::Node
     {
         public:
-            A_SMC_PUBLIC
+            A_SMCHCV_PUBLIC
             explicit ScanmatchingComponent(const rclcpp::NodeOptions & options);
 
         private:
@@ -97,12 +97,9 @@ namespace autobin
             tf2_ros::TransformListener listener;
             tf2_ros::TransformBroadcaster broadcaster;
 
-            tf2::TimePoint time_point;
-
             std::string global_frame_id_;
             std::string robot_frame_id_;
             std::string lidar_frame_id_;
-            std::string odom_frame_id_;
             std::string cloud_topic_;
             std::string odom_topic_;
             std::string registration_method_;
@@ -188,7 +185,7 @@ namespace autobin
 
             void get_pose(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &cloud_in, const Eigen::Matrix4f final_transformation, const rclcpp::Time stamp);
 
-            void ekf_scanmatching(Eigen::Vector3d translation_vector,const double yaw, const rclcpp::Time stamp, Eigen::Matrix<double, 8, 1> &x_out);
+            void ekf_scanmatching(Eigen::Vector3d translation_vector,const double yaw, const rclcpp::Time stamp, Eigen::Matrix<double, 6, 1> &x_out);
 
             void update(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr cloud_in, const Eigen::Matrix4f final_transformation, const geometry_msgs::msg::PoseStamped current_pose_stamped);
 
@@ -218,19 +215,16 @@ namespace autobin
             double R_variance_;
 
             //component
-            Eigen::Matrix4f final_transformation;
-
-            Eigen::Matrix4f transform_mat;
 
             Eigen::Vector3d translation_vector;
 
             Eigen::Matrix3d rotation_matrix;
 
-            Eigen::Matrix<double, 8, 1> x;
+            Eigen::Matrix<double, 6, 1> x;
 
-            Eigen::Matrix<double, 8, 1> x_out;
+            Eigen::Matrix<double, 6, 1> x_out;
 
-            Eigen::Matrix<double, 8, 8> p;
+            Eigen::Matrix<double, 6, 6> p;
 
             Eigen::Matrix<double, 3, 1> measurement_vector;
 
@@ -246,9 +240,9 @@ namespace autobin
 
             double previous_trans_pose_x, previous_trans_pose_y;
 
-            Eigen::Matrix<double, 8, 8> init_p_out_, p_predict_in, p_predict_out, p_correct_in, p_correct_out;
+            Eigen::Matrix<double, 6, 6> init_p_out_, p_predict_in, p_predict_out, p_correct_in, p_correct_out;
 
-            Eigen::Matrix<double, 8, 1> init_x_out_, x_predict_in, x_predict_out, x_correct_in, x_correct_out;
+            Eigen::Matrix<double, 6, 1> init_x_out_, x_predict_in, x_predict_out, x_correct_in, x_correct_out;
 
             int i = 0;
             int u = 0;
@@ -260,7 +254,7 @@ namespace autobin
 }
 
 
-#endif //AUTOBIN__SM_COMPONENT_HPP_
+#endif //AUTOBIN__SMCHCV_COMPONENT_HPP_
 
 
 

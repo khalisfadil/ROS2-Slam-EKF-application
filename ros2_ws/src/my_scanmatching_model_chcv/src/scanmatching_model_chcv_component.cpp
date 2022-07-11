@@ -1,4 +1,4 @@
-#include <my_scanmatching/scanmatching_component.hpp>
+#include <my_scanmatching_model_chcv/scanmatching_model_chcv_component.hpp>
 #include <chrono>
 
 using namespace std::chrono_literals;
@@ -12,13 +12,10 @@ namespace autobin
     listener(tfbuffer),
     broadcaster(this)
     {   
-        RCLCPP_INFO(get_logger(), "initialization start");
+        RCLCPP_INFO(get_logger(), "initialization CHCV start");
 
         declare_parameter("global_frame_id_", "map");
         get_parameter("global_frame_id_", global_frame_id_);
-
-        declare_parameter("odom_frame_id_", "odom");
-        get_parameter("odom_frame_id_", odom_frame_id_);
 
         declare_parameter("robot_frame_id", "base_link");
         get_parameter("robot_frame_id", robot_frame_id_);
@@ -160,10 +157,9 @@ namespace autobin
             //=====================================================
             //ilustrate the gps available and not avalable condition
             //=====================================================
-            
             z++;
             std::cout<< "step: " << z << std::endl;
-            if(z <= 60 || z>= 120)
+            if(z <= 10 || z>= 70)
             {
                 gps_available = true;
             }else
@@ -183,7 +179,7 @@ namespace autobin
                 geo_msg->pose.position.z = 0;
                 geo_msg->pose.orientation.x = odom_pose_msg.pose.pose.orientation.x;
                 geo_msg->pose.orientation.y = odom_pose_msg.pose.pose.orientation.y;
-                geo_msg->pose.orientation.z = -1*odom_pose_msg.pose.pose.orientation.z;
+                geo_msg->pose.orientation.z = odom_pose_msg.pose.pose.orientation.z;
                 geo_msg->pose.orientation.w = odom_pose_msg.pose.pose.orientation.w;
                 current_pose = *geo_msg;
                 pub_pose -> publish(current_pose);
@@ -218,10 +214,10 @@ namespace autobin
             ref_pose.pose.position.x = pose_x;
             ref_pose.pose.position.y = pose_y;
             ref_pose.pose.position.z = pose_z;
-            ref_pose.pose.orientation.x = odom_ref_pose_msg.pose.pose.orientation.x;
-            ref_pose.pose.orientation.y = odom_ref_pose_msg.pose.pose.orientation.y;
-            ref_pose.pose.orientation.z = -1*odom_ref_pose_msg.pose.pose.orientation.z;
-            ref_pose.pose.orientation.w = odom_ref_pose_msg.pose.pose.orientation.w;
+            ref_pose.pose.orientation.x = odom_pose_msg.pose.pose.orientation.x;
+            ref_pose.pose.orientation.y = odom_pose_msg.pose.pose.orientation.y;
+            ref_pose.pose.orientation.z = odom_pose_msg.pose.pose.orientation.z;
+            ref_pose.pose.orientation.w = odom_pose_msg.pose.pose.orientation.w;
 
             pub_ref_pose -> publish(ref_pose);
 
@@ -238,10 +234,10 @@ namespace autobin
                 gps_pose.pose.position.x = pose_x;
                 gps_pose.pose.position.y = pose_y;
                 gps_pose.pose.position.z = pose_z;
-                gps_pose.pose.orientation.x = odom_ref_pose_msg.pose.pose.orientation.x;
-                gps_pose.pose.orientation.y = odom_ref_pose_msg.pose.pose.orientation.y;
-                gps_pose.pose.orientation.z = -1*odom_ref_pose_msg.pose.pose.orientation.z;
-                gps_pose.pose.orientation.w = odom_ref_pose_msg.pose.pose.orientation.w;
+                gps_pose.pose.orientation.x = odom_pose_msg.pose.pose.orientation.x;
+                gps_pose.pose.orientation.y = odom_pose_msg.pose.pose.orientation.y;
+                gps_pose.pose.orientation.z = odom_pose_msg.pose.pose.orientation.z;
+                gps_pose.pose.orientation.w = odom_pose_msg.pose.pose.orientation.w;
                 current_pose = gps_pose;
                 pub_pose -> publish(current_pose);
 
@@ -278,91 +274,83 @@ namespace autobin
             
             header_msg.header = msg->header;
 
-            if(initial_state_received_)
-            {
-                //define the transformation between lidar and base link
-                sensor_msgs::msg::PointCloud2 cloud_transformed_msg;
-
-                try{
-
-                    tf2::TimePoint time_point = tf2::TimePoint(std::chrono::seconds(msg->header.stamp.sec) + std::chrono::nanoseconds(msg->header.stamp.nanosec));
-
-                    const geometry_msgs::msg::TransformStamped geo_transformed_msg = tfbuffer.lookupTransform(robot_frame_id_, msg->header.frame_id, time_point);
-
-                    tf2::doTransform(*msg, cloud_transformed_msg, geo_transformed_msg);
-                    
-                }catch(tf2::TransformException &e){
-                    
-                    RCLCPP_ERROR(this->get_logger(), "%s", e.what());
-                    
-                    return;
-                }
-
-                //declare a space for transformed cloud
-                pcl::PointCloud<pcl::PointXYZI>::Ptr stored_cloud(new pcl::PointCloud<pcl::PointXYZI>());
-
-                pcl::fromROSMsg(cloud_transformed_msg, *stored_cloud);
-
-                if(!initial_cloud_received_)
-                {   
-                    RCLCPP_INFO(get_logger(), "create a first map");
-
-                    pcl::PointCloud<pcl::PointXYZI>::Ptr init_cloud(new pcl::PointCloud<pcl::PointXYZI>());
-
-                    pcl::VoxelGrid<pcl::PointXYZI> voxel_grid;
-
-                    voxel_grid.setLeafSize(vg_size_,vg_size_,vg_size_);
-
-                    voxel_grid.setInputCloud(stored_cloud);
-
-                    voxel_grid.filter(*init_cloud);
-
-                    Eigen::Matrix4f transform_mat = getTransformation(current_pose.pose);
-
-                    pcl::PointCloud<pcl::PointXYZI>::Ptr init_cloud_transformed(new pcl::PointCloud<pcl::PointXYZI>());
-
-                    pcl::transformPointCloud(*init_cloud, *init_cloud_transformed, transform_mat);
-
-                    registration->setInputTarget(init_cloud_transformed);
-
-                    initial_cloud_received_ = true;
-                    
-
-                    //map
-                    sensor_msgs::msg::PointCloud2::SharedPtr map_msg_ptr(new sensor_msgs::msg::PointCloud2);
-
-                    pcl::toROSMsg(*init_cloud_transformed,*map_msg_ptr);
-
-                    //map array
-                    sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg_ptr(new sensor_msgs::msg::PointCloud2);
-
-                    pcl::toROSMsg(*init_cloud,*cloud_msg_ptr);
-
-                    lidarslam_msgs::msg::SubMap submap;
-
-                    submap.header = msg->header;
-
-                    submap.distance = 0;
-
-                    submap.pose =current_pose.pose;
-
-                    submap.cloud = *cloud_msg_ptr;
-
-                    map_array_msg_.header = msg->header;
-
-                    map_array_msg_.submaps.push_back(submap);
-
-                    pub_map->publish(submap.cloud);
-
-                    last_map_time = clock_.now();
-                    
-                }
-
-                if(initial_cloud_received_)
+            if(!gps_available)
+            {   
+                RCLCPP_INFO(get_logger(), "GPS is not available - take pose from GPS");
+                if(initial_state_received_)
                 {
-                    process_cloud(stored_cloud, msg->header.stamp);
-                }
+                    //define the transformation between lidar and base link
+                    sensor_msgs::msg::PointCloud2 cloud_transformed_msg;
 
+                    try{
+
+                        tf2::TimePoint time_point = tf2::TimePoint(std::chrono::seconds(msg->header.stamp.sec) + std::chrono::nanoseconds(msg->header.stamp.nanosec));
+
+                        const geometry_msgs::msg::TransformStamped geo_transformed_msg = tfbuffer.lookupTransform(robot_frame_id_, msg->header.frame_id, time_point);
+
+                        tf2::doTransform(*msg, cloud_transformed_msg, geo_transformed_msg);
+                        
+                    }catch(tf2::TransformException &e){
+                        
+                        RCLCPP_ERROR(this->get_logger(), "%s", e.what());
+                        
+                        return;
+                    }
+
+                    //declare a space for transformed cloud
+                    pcl::PointCloud<pcl::PointXYZI>::Ptr stored_cloud(new pcl::PointCloud<pcl::PointXYZI>());
+
+                    pcl::fromROSMsg(cloud_transformed_msg, *stored_cloud);
+
+                    if(!initial_cloud_received_)
+                    {   
+                        RCLCPP_INFO(get_logger(), "create a first map");
+
+                        pcl::PointCloud<pcl::PointXYZI>::Ptr init_cloud(new pcl::PointCloud<pcl::PointXYZI>());
+
+                        pcl::VoxelGrid<pcl::PointXYZI> voxel_grid;
+                        voxel_grid.setLeafSize(vg_size_,vg_size_,vg_size_);
+                        voxel_grid.setInputCloud(stored_cloud);
+                        voxel_grid.filter(*init_cloud);
+
+                        Eigen::Matrix4f transform_mat = getTransformation(current_pose.pose);
+
+                        pcl::PointCloud<pcl::PointXYZI>::Ptr init_cloud_transformed(new pcl::PointCloud<pcl::PointXYZI>());
+
+                        pcl::transformPointCloud(*init_cloud, *init_cloud_transformed, transform_mat);
+
+                        registration->setInputTarget(init_cloud_transformed);
+
+                        initial_cloud_received_ = true;
+                        
+
+                        //map
+                        sensor_msgs::msg::PointCloud2::SharedPtr map_msg_ptr(new sensor_msgs::msg::PointCloud2);
+                        pcl::toROSMsg(*init_cloud_transformed,*map_msg_ptr);
+
+                        //map array
+                        sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg_ptr(new sensor_msgs::msg::PointCloud2);
+                        pcl::toROSMsg(*init_cloud,*cloud_msg_ptr);
+                        lidarslam_msgs::msg::SubMap submap;
+                        submap.header = msg->header;
+                        submap.distance = 0;
+                        submap.pose =current_pose.pose;
+                        submap.cloud = *cloud_msg_ptr;
+                        map_array_msg_.header = msg->header;
+                        map_array_msg_.submaps.push_back(submap);
+
+                        pub_map->publish(submap.cloud);
+
+                        last_map_time = clock_.now();
+                        
+                    }
+
+                    if(initial_cloud_received_)
+                    {
+                        process_cloud(stored_cloud, msg->header.stamp);
+                    }
+
+                }
             }
 
         };
@@ -431,120 +419,147 @@ namespace autobin
                 mapping_thread.detach();
             }
         }
-       
-        if(gps_available)
-        {
-            Eigen::Matrix4f gps_transform_mat = getTransformation(current_pose.pose);
 
-            Eigen::Vector3d gps_translation_vector = gps_transform_mat.block<3,1>(0,3).cast<double>();
+        ekf_complete = false;
+                    
+        //declare
+        pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_cloud_in(new pcl::PointCloud<pcl::PointXYZI>());
+        //declare voxel
+        pcl::VoxelGrid<pcl::PointXYZI> voxel_grid;
+        voxel_grid.setLeafSize(vg_size_, vg_size_, vg_size_);//TODO:decalre vg sizer in param
+        voxel_grid.setInputCloud(cloud_in);
+        voxel_grid.filter(*filtered_cloud_in);
+        //point cloud registration
+        registration->setInputSource(filtered_cloud_in);
 
-            Eigen::Matrix3d gps_rotation_matrix = gps_transform_mat.block<3,3>(0,0).cast<double>();
-
-            Eigen::Quaterniond gps_quat(gps_rotation_matrix);
-
-            geometry_msgs::msg::Quaternion gps_geo_quat = tf2::toMsg(gps_quat);
-
-            tf2::Quaternion gps_tf2_quat, gps_tf2_quat_new;
-
-            tf2::fromMsg(gps_geo_quat, gps_tf2_quat);
-
-            double gps_roll, gps_pitch, gps_yaw;
+        //get the transformation matrix from current pose (current pose consist of x,y,z,qx,qy,qz)
+        Eigen::Matrix4f transform_mat = getTransformation(current_pose.pose);
+        //
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZI>);
+        rclcpp::Clock system_clock;
             
-            tf2::Matrix3x3(gps_tf2_quat).getRPY(gps_roll, gps_pitch, gps_yaw); 
 
-            ekf_scanmatching(gps_translation_vector, gps_yaw, stamp, x_out);
+        //allign the cloud with transform matrix
+        rclcpp::Time time_align_start = system_clock.now();
+    
+        //##################################################
+        if(use_ekf_)
+        {    
+            //declare
+            geometry_msgs::msg::PoseStamped preallocation_pose;
+            tf2::Quaternion preallocate_tf2_quat_msg, preallocate_tf2_quat_new_msg;
+            Eigen::Vector3d preallocate_translation_vector;
 
-            get_pose(cloud_in, gps_transform_mat, stamp);
+            preallocation_pose = current_pose;
 
-        }else if(!gps_available)
-        {
+            preallocate_translation_vector.x() = preallocation_pose.pose.position.x;
+            preallocate_translation_vector.y() = preallocation_pose.pose.position.y;
+            preallocate_translation_vector.z() = preallocation_pose.pose.position.z;
+
+            // Convert Eigen::Quaternion to geometry_msgs::msg::Quaternion
+            geometry_msgs::msg::Quaternion preallocate_geo_quat_msg;
             
-            RCLCPP_INFO(get_logger(), "GPS not available - take pose from Scanmatching");
+            preallocate_geo_quat_msg = preallocation_pose.pose.orientation;
 
-            pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_cloud_in(new pcl::PointCloud<pcl::PointXYZI>());
+            // Convert geometry_msgs::msg::Quaternion to tf2::Quaternion
+            tf2::fromMsg(preallocate_geo_quat_msg, preallocate_tf2_quat_msg);
 
-            pcl::VoxelGrid<pcl::PointXYZI> voxel_grid;
+            //tf2::fromMsg(corrent_pose_stamped_.pose.orientation, quat_tf);
+            double preallocate_roll, preallocate_pitch , preallocate_yaw;
 
-            voxel_grid.setLeafSize(vg_size_, vg_size_, vg_size_);
+            tf2::Matrix3x3(preallocate_tf2_quat_msg).getRPY(preallocate_roll, preallocate_pitch, preallocate_yaw);
 
-            voxel_grid.setInputCloud(cloud_in);
+            //run ekf
+            ekf_scanmatching(preallocate_translation_vector, preallocate_yaw, stamp, x_out);
 
-            voxel_grid.filter(*filtered_cloud_in);
-
-            registration->setInputSource(filtered_cloud_in);
-
-            Eigen::Matrix4f pre_scan_transform_mat= getTransformation(current_pose.pose);
-
-            pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZI>);
-
-            rclcpp::Clock system_clock;
-
-            rclcpp::Time time_align_start = system_clock.now();
-
-            registration->align(*cloud_out, pre_scan_transform_mat);
-
-            rclcpp::Time time_align_end = system_clock.now();
-
-            Eigen::Matrix4f scan_transform_mat = registration->getFinalTransformation();
-
-            Eigen::Vector3d scan_translation_vector = scan_transform_mat.block<3,1>(0,3).cast<double>();
-
-            Eigen::Matrix3d scan_rotation_matrix = scan_transform_mat.block<3,3>(0,0).cast<double>();
-
-            Eigen::Quaterniond scan_quat(scan_rotation_matrix);
-
-            geometry_msgs::msg::Quaternion scan_geo_quat = tf2::toMsg(scan_quat);
-
-            tf2::Quaternion scan_tf2_quat, scan_tf2_quat_new;
-
-            tf2::fromMsg(scan_geo_quat, scan_tf2_quat);
-
-            double scan_roll, scan_pitch, scan_yaw;
-            
-            tf2::Matrix3x3(scan_tf2_quat).getRPY(scan_roll, scan_pitch, scan_yaw);
+            preallocation_pose.pose.position.x = x_out(0,0);
+            preallocation_pose.pose.position.y = x_out(1,0);
+            //preallocate_yaw = x_out(6,0);
 
             if(neglect_roll_pitch_z_)
             {
-                scan_tf2_quat_new.setRPY(0,0,scan_yaw);
+                preallocate_tf2_quat_new_msg.setRPY(0,0,preallocate_yaw);
 
-                scan_translation_vector.z() = 0;
+                preallocation_pose.pose.position.z = 0;
 
             }else if(!neglect_roll_pitch_z_)
             {
-                scan_tf2_quat_new.setRPY(scan_roll,scan_pitch,scan_yaw);
+                preallocate_tf2_quat_new_msg.setRPY(preallocate_roll, preallocate_pitch, preallocate_yaw);
             }
 
-            ekf_scanmatching(scan_translation_vector, scan_yaw, stamp, x_out);
+            preallocation_pose.pose.orientation.x = preallocate_tf2_quat_new_msg.x();
+            preallocation_pose.pose.orientation.y = preallocate_tf2_quat_new_msg.y();
+            preallocation_pose.pose.orientation.z = preallocate_tf2_quat_new_msg.z();
+            preallocation_pose.pose.orientation.w = preallocate_tf2_quat_new_msg.w();
 
-            if(use_ekf_)
-            {
-                scan_translation_vector.x() = x_out(0);
+            Eigen::Matrix4f transform_mat_ekf = getTransformation(preallocation_pose.pose);
 
-                scan_translation_vector.y() = x_out(1);
-            }
+            std::cout <<"============================================================================"<< std::endl;
+            std::cout <<"=============================Scanmatching debug==========================="<< std::endl;
+            std::cout << "initial transformation: " << std::endl;
+            std::cout << transform_mat << std::endl;
+            std::cout << "ekf_final transformation: " << std::endl;
+            std::cout << transform_mat_ekf << std::endl;
+            std::cout <<"============================================================================"<< std::endl;
 
-            geometry_msgs::msg::Quaternion final_scan_geo_quat = tf2::toMsg(scan_tf2_quat_new);
+            //transform_mat = transform_mat_ekf;
 
-            Eigen::Quaterniond final_scan_eigen_quat;
+            current_pose = preallocation_pose;
 
-            tf2::fromMsg(final_scan_geo_quat, final_scan_eigen_quat);
+            ekf_complete = true;
 
-            Eigen::Matrix3d final_scan_rotation_mat_d = final_scan_eigen_quat.toRotationMatrix();
+            RCLCPP_INFO(get_logger(),"EKF complete!");
 
-            Eigen::Matrix3f final_scan_rotation_mat = final_scan_rotation_mat_d.cast<float>();
-
-            Eigen::Vector3f final_scan_translation_vector = scan_translation_vector.cast<float>();
-
-            Eigen::Matrix4f final_scan_transform_mat = Eigen::Matrix4f::Identity();
-
-            final_scan_transform_mat.block<3,3>(0,0) = final_scan_rotation_mat;
-
-            final_scan_transform_mat.block<3,1>(0,3) = final_scan_translation_vector;
-
-            get_pose(cloud_in, final_scan_transform_mat, stamp);
 
         }
-            
+
+ 
+        //##################################################
+        if(use_ekf_ && ekf_complete)
+        {
+            registration->align(*cloud_out, transform_mat);
+
+        }else if(use_ekf_ && !ekf_complete)
+        {
+            RCLCPP_WARN(get_logger(),"EKF need some time!");
+
+        }else if(!use_ekf_)
+        {
+            registration->align(*cloud_out, transform_mat);
+        }
+        
+
+        rclcpp::Time time_align_end = system_clock.now();
+
+        //get final tranformation
+        Eigen::Matrix4f final_transformation = registration->getFinalTransformation();
+
+        //TODOfunction getpose
+        get_pose(cloud_in, final_transformation, stamp);
+
+        //debugging
+        tf2::Quaternion quat_transform;
+        double roll, pitch , yaw;
+        tf2::fromMsg(current_pose.pose.orientation, quat_transform);
+        tf2::Matrix3x3 (quat_transform).getRPY(roll,pitch,yaw);
+        u++;
+        /*
+        std::cout <<"============================================================================"<< std::endl;
+        std::cout <<"=============================Scanmatching debug==========================="<< std::endl;
+        std::cout <<"STEP:  "<< u << std::endl;
+        std::cout <<"                                                                            " <<std::endl;
+        std::cout << "nanoseconds: " << stamp.nanoseconds() << std::endl;
+        std::cout << "align time: " << time_align_end.seconds() - time_align_start.seconds() << "s" <<std::endl;
+        std::cout << "number of filtered cloud points: " << filtered_cloud_in->size() << std::endl;
+        std::cout << "initial transformation: " << std::endl;
+        std::cout << transform_mat << std::endl;
+        std::cout << "has converged: " << registration->hasConverged() << std::endl;
+        std::cout << "fitnes score: " << registration->getFitnessScore() << std::endl;
+        std::cout << "final transdormation: " << std::endl;
+        std::cout << final_transformation << std::endl;
+        std::cout << "roll: " << roll*180/M_PI <<"deg" << " , " << "pitch: " << pitch*180/M_PI <<"deg" << " , " << "yaw: " << yaw*180/M_PI <<"deg" << std::endl;
+        std::cout <<"============================================================================"<< std::endl;
+        */
     }
 
     //------------------------------------------------------------------
@@ -556,9 +571,32 @@ namespace autobin
 
         Eigen::Matrix3d rotation_matrix = final_transformation.block<3,3>(0,0).cast<double>();
 
+        //convert rotation matrix 3x3 into quaterniond qx qy qz qw
         Eigen::Quaterniond quat_value(rotation_matrix);
 
+        // Convert Eigen::Quaternion to geometry_msgs::msg::Quaternion
         geometry_msgs::msg::Quaternion geo_quat_msg = tf2::toMsg(quat_value); 
+
+        //declare quaternion
+        tf2::Quaternion tf2_quat_msg, tf2_quat_new_msg;
+
+        // Convert geometry_msgs::msg::Quaternion to tf2::Quaternion
+        tf2::fromMsg(geo_quat_msg, tf2_quat_msg);
+
+        //tf2::fromMsg(corrent_pose_stamped_.pose.orientation, quat_tf);
+        double roll, pitch , yaw;
+        tf2::Matrix3x3(tf2_quat_msg).getRPY(roll, pitch, yaw);
+
+        //neglecting the roll and pitch or not
+        if(neglect_roll_pitch_z_)
+        {
+            tf2_quat_new_msg.setRPY(0,0,yaw);
+            translation_vector.z()=0;
+
+        }else if(!neglect_roll_pitch_z_)
+        {
+            tf2_quat_new_msg.setRPY(roll,pitch,yaw);
+        }
 
         geometry_msgs::msg::TransformStamped transform_stamped;
         transform_stamped.header.stamp = stamp;
@@ -567,7 +605,10 @@ namespace autobin
         transform_stamped.transform.translation.x = translation_vector.x();
         transform_stamped.transform.translation.y = translation_vector.y();
         transform_stamped.transform.translation.z = translation_vector.z();
-        transform_stamped.transform.rotation = geo_quat_msg;
+        transform_stamped.transform.rotation.x = tf2_quat_new_msg.x();
+        transform_stamped.transform.rotation.y = tf2_quat_new_msg.y();
+        transform_stamped.transform.rotation.z = tf2_quat_new_msg.z();
+        transform_stamped.transform.rotation.w = tf2_quat_new_msg.w();
         broadcaster.sendTransform(transform_stamped);
 
         current_pose.header.stamp = stamp;
@@ -575,7 +616,10 @@ namespace autobin
         current_pose.pose.position.x = translation_vector.x();
         current_pose.pose.position.y = translation_vector.y();
         current_pose.pose.position.z = translation_vector.z();
-        current_pose.pose.orientation = geo_quat_msg;
+        current_pose.pose.orientation.x = tf2_quat_new_msg.x();
+        current_pose.pose.orientation.y = tf2_quat_new_msg.y();
+        current_pose.pose.orientation.z = tf2_quat_new_msg.z();
+        current_pose.pose.orientation.w = tf2_quat_new_msg.w();
 
         pub_pose -> publish(current_pose);
 
@@ -584,21 +628,17 @@ namespace autobin
         pub_path->publish(path_taken);
 
         trans = (translation_vector - previous_position).norm();
-        
         if(trans >= trans_for_mapupdate && !mapping_flag)
         {
             geometry_msgs::msg::PoseStamped current_pose_stamped;
-
             current_pose_stamped = current_pose;
-
             previous_position = translation_vector;
-
-            mapping_task = std::packaged_task<void()>(std::bind(&ScanmatchingComponent::update, this, cloud_in, final_transformation, current_pose_stamped));
-
+            mapping_task = std::packaged_task<void()>(
+                std::bind(
+                    &ScanmatchingComponent::update, this, cloud_in, 
+                    final_transformation, current_pose_stamped));
             mapping_future = mapping_task.get_future();
-
             mapping_thread = std::thread(std::move(std::ref(mapping_task)));
-
             mapping_flag = true;
         }
         
@@ -607,25 +647,17 @@ namespace autobin
     void ScanmatchingComponent::update(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr cloud_in, const Eigen::Matrix4f final_transformation, const geometry_msgs::msg::PoseStamped current_pose_stamped)
     {
         pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>());
-
         pcl::VoxelGrid<pcl::PointXYZI> vg;
-
         vg.setLeafSize(vg_size_map,vg_size_map,vg_size_map);
-
         vg.setInputCloud(cloud_in);
-
         vg.filter(*filtered_cloud_ptr);
 
         pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>());
-
         pcl::transformPointCloud(*filtered_cloud_ptr,*transformed_cloud_ptr,final_transformation);
 
         targeted_cloud.clear();
-
         targeted_cloud += *transformed_cloud_ptr;
-
         int num_submaps = map_array_msg_.submaps.size();
-
         for(int i =0;i<num_targeted_cloud -1; i++)
         {
             if(num_submaps -1 -i < 0)
@@ -634,57 +666,38 @@ namespace autobin
             }
 
             pcl::PointCloud<pcl::PointXYZI>::Ptr tmp_ptr(new pcl::PointCloud<pcl::PointXYZI>());
-
             pcl::fromROSMsg(map_array_msg_.submaps[num_submaps - 1 -i].cloud, *tmp_ptr);
-
             pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_tmp_ptr(new pcl::PointCloud<pcl::PointXYZI>());
-
             Eigen::Affine3d submap_affine; 
-
             tf2::fromMsg(map_array_msg_.submaps[num_submaps -1- i].pose, submap_affine);
-
             pcl::transformPointCloud(*tmp_ptr, *transformed_tmp_ptr, submap_affine.matrix());
-
             targeted_cloud += *transformed_tmp_ptr;
 
         }
 
+        //map array
         sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg_ptr(new sensor_msgs::msg::PointCloud2);
-
         pcl::toROSMsg(*filtered_cloud_ptr, *cloud_msg_ptr);
 
         lidarslam_msgs::msg::SubMap submap;
-
         submap.header.frame_id = global_frame_id_;
-
         submap.header.stamp = current_pose_stamped.header.stamp;
-
         latest_distance += trans;
-
         submap.distance = latest_distance;
-
         submap.pose = current_pose_stamped.pose;
-
         submap.cloud = *cloud_msg_ptr;
-
         submap.cloud.header.frame_id = global_frame_id_;
-
         map_array_msg_.header.stamp = current_pose_stamped.header.stamp;
-
         map_array_msg_.submaps.push_back(submap);
-
         pub_map_array ->publish(map_array_msg_);
 
         is_map_updated = true;
 
         rclcpp::Time map_time = clock_.now();
-
         double dt = map_time.seconds() - last_map_time.seconds();
-
         if(dt>map_publish_period)
         {
             publishMap();
-
             last_map_time = map_time;
         }
         
@@ -702,15 +715,11 @@ namespace autobin
         for(auto &submap : map_array_msg_.submaps)
         {
             pcl::PointCloud<pcl::PointXYZI>::Ptr submap_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
-
             pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_submap_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
-
             pcl::fromROSMsg(submap.cloud, *submap_cloud_ptr);
 
             Eigen::Affine3d affine;
-
             tf2::fromMsg(submap.pose, affine);
-
             pcl::transformPointCloud(*submap_cloud_ptr, *transformed_submap_cloud_ptr, affine.matrix().cast<float>());
 
             *map_ptr += *transformed_submap_cloud_ptr;
@@ -719,11 +728,8 @@ namespace autobin
         std::cout << "number of map points: " << map_ptr->size() << std::endl;
 
         sensor_msgs::msg::PointCloud2::SharedPtr map_msg_ptr(new sensor_msgs::msg::PointCloud2);
-
         pcl::toROSMsg(*map_ptr, *map_msg_ptr);
-
         map_msg_ptr->header.frame_id = global_frame_id_;
-
         pub_map->publish(*map_msg_ptr);
     }
 
@@ -731,17 +737,18 @@ namespace autobin
     //------------------------------------------------------------------
     //this function is application of extended kalman filter
     //------------------------------------------------------------------
-    void ScanmatchingComponent::ekf_scanmatching(Eigen::Vector3d translation_vector, double yaw_in, const rclcpp::Time stamp, Eigen::Matrix<double, 8, 1> &x_out)
+    void ScanmatchingComponent::ekf_scanmatching(Eigen::Vector3d translation_vector, double yaw_in, const rclcpp::Time stamp, Eigen::Matrix<double, 6, 1> &x_out)
     {
-
+        RCLCPP_INFO(get_logger(), "use_scanmatching");
+        //devlare R variance
         var_R << pow(R_variance_,2), R_variance_, sqrt(R_variance_); //TODO declare var_R in public
 
+        //input is the predicted scanmatching value of x and y
         double trans_pose_x = translation_vector(0);
-
         double trans_pose_y = translation_vector(1);
-
         double trans_yaw = yaw_in;
 
+        //cummulative distace of x and y
         measurement_vector << trans_pose_x, trans_pose_y, trans_yaw; //correction state
 
         if(!ekf_initial_state_received_)
@@ -753,6 +760,7 @@ namespace autobin
             p = init_p_out_;
 
             ekf_initial_state_received_ = true;
+
         }
         
         if(ekf_initial_state_received_)
@@ -769,7 +777,6 @@ namespace autobin
             }
 
             long double dt = current_stamp_sensor - previous_stamp_sensor;
-
             previous_stamp_sensor = current_stamp_sensor;
 
             ekf.prediction(dt, x_predict_in, p_predict_in, x_predict_out, p_predict_out);
@@ -786,17 +793,27 @@ namespace autobin
 
         }
 
+        //ekf debugging
+        i++;
+        /*
+        std::cout <<"============================================================================"<< std::endl;
+        std::cout <<"=================================ekf debugging==============================="<< std::endl;
+        std::cout <<"STEP:  "<< i << std::endl;
+        std::cout <<"                                                                            " <<std::endl; 
+        std::cout <<"X_out:  " << x(0) << "    " <<"Y_out:  " << x(1) << "    " << "Yaw_out: " << x(2) << "     " << "V_out:   " << x(3) << std::endl;                  
+        std::cout <<"P1: " <<  p(0,0) << "    " << "P2:  " << p(1,1)<< "    " << "P3:  " << p(2,2) << "    " << "P4:  " << p(3,3) << std::endl;
+        std::cout <<"============================================================================"<< std::endl;
+        */
     }
 
     Eigen::Matrix4f ScanmatchingComponent::getTransformation(const geometry_msgs::msg::Pose pose)
     {
         Eigen::Affine3d affine;
-
         tf2::fromMsg(pose, affine);
 
         Eigen::Matrix4f transform_mat_ekf =affine.matrix().cast<float>();
-
         return transform_mat_ekf;
+
     }
 
 }

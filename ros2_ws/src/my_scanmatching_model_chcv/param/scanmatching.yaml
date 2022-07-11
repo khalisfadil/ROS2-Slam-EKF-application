@@ -13,6 +13,6 @@ scan_matching:
     num_targeted_cloud: 500
     scan_period: 0.01
     map_publish_period: 50.0
-    use_ekf: false
+    use_ekf: true
     neglect_roll_pitch_z: true
 
