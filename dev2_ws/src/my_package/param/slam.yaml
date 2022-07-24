@@ -1,0 +1,24 @@
+myslam:
+  ros__parameters:
+    global_frame_id: "map"
+    robot_frame_id: "base_link"
+
+    registration_method: "NDT_OMP"
+    map_publish_period: 1.0
+    trans_for_map_update: 1.0
+    num_targeted_cloud: 10
+
+    ndt_resolution: 5.0
+    ndt_num_threads: 8
+    neighborhood_search_method: "DIRECT7"
+
+    gicp_corr_dist_threshold: 5.0
+
+    vg_size: 0.9
+    vg_size_map: 0.4
+
+    R_variance: 100.0
+    Kalman_Filter_model: "CHCV"
+
+    use_ekf: true
+    neglect_roll_pitch_z: true

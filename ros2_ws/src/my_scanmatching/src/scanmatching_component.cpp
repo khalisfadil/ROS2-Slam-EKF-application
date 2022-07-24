@@ -53,7 +53,7 @@ namespace autobin
         if (num_targeted_cloud < 1) {
         std::cout << "num_tareged_cloud should be positive" << std::endl;
         num_targeted_cloud = 1;
-  }
+        }
 
         //=====================================================
         //parameter for NDT

@@ -23,7 +23,7 @@ class MY_SCANMATCHING_EKF
             //initialiting state P
             Eigen::Matrix<double, 6, 6> P;
             P.block<2,2>(0,0) = Eigen::Matrix<double, 2,2>::Identity()*10;
-            P.block<2,2>(2,2) = Eigen::Matrix<double, 2,2>::Identity()*1;
+            P.block<2,2>(2,2) = Eigen::Matrix<double, 2,2>::Identity()*10;
             P.block<2,2>(4,4) = Eigen::Matrix<double, 2,2>::Identity()*1;
 
             init_p_out= P;
