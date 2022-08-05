@@ -1,0 +1,25 @@
+rosbag2_bagfile_information:
+  version: 4
+  storage_identifier: sqlite3
+  relative_file_paths:
+    - chcv_0.db3
+  duration:
+    nanoseconds: 178999692817
+  starting_time:
+    nanoseconds_since_epoch: 1658718507434241578
+  message_count: 360
+  topics_with_message_count:
+    - topic_metadata:
+        name: /current_pose
+        type: geometry_msgs/msg/PoseStamped
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 180
+    - topic_metadata:
+        name: /ref_pose
+        type: geometry_msgs/msg/PoseStamped
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 180
+  compression_format: ""
+  compression_mode: ""

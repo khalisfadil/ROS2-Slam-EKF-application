@@ -14,11 +14,11 @@ myslam:
 
     gicp_corr_dist_threshold: 5.0
 
-    vg_size: 0.9
-    vg_size_map: 0.4
+    vg_size: 1.0
+    vg_size_map: 0.5
 
     R_variance: 100.0
-    Kalman_Filter_model: "CHCV"
+    Kalman_Filter_model: "CHCA"
 
     use_ekf: true
     neglect_roll_pitch_z: true

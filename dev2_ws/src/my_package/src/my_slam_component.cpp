@@ -175,7 +175,7 @@ namespace autobin
             //================================
             step++;
             std::cout << "Step: " << step << std::endl;
-            if(step <= 30 )
+            if(step <= 185 )
             {
                 gps_available = true;
             }else{
@@ -304,8 +304,8 @@ namespace autobin
         //================================
         auto cloud_callback = [this](const typename sensor_msgs::msg::PointCloud2::SharedPtr msg) -> void
         {
-            //header_msg.header.stamp = msg->header.stamp;
-            header_msg.header.stamp = rclcpp::Clock().now();
+            header_msg.header.stamp = msg->header.stamp;
+            //header_msg.header.stamp = rclcpp::Clock().now();
 
             //initialize cloud msg
             //================================
@@ -358,12 +358,12 @@ namespace autobin
                     pcl::toROSMsg(*init_cloud,*cloud_msg_ptr);
 
                     lidarslam_msgs::msg::SubMap submap;
-                    submap.header = msg->header;
+                    submap.header = header_msg.header;
                     submap.distance = 0;
                     submap.pose = current_pose.pose;
                     submap.cloud = *cloud_msg_ptr;
 
-                    map_array_msg.header = msg->header;
+                    map_array_msg.header = header_msg.header;
                     map_array_msg.submaps.push_back(submap);
 
                     pub_map->publish(submap.cloud);
@@ -373,8 +373,8 @@ namespace autobin
 
                 if(initial_cloud_received)
                 {
-                    process_cloud(stored_cloud, msg->header.stamp);
-                    //process_cloud(stored_cloud, header_msg.header.stamp);
+                    //process_cloud(stored_cloud, msg->header.stamp);
+                    process_cloud(stored_cloud, header_msg.header.stamp);
                 }
             }
         };
