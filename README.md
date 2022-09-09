@@ -66,7 +66,7 @@ if you have some problem run the shell script, try
 ```bash
 chmod +x rosbagplay.sh
 ```
-### Catkin Workspace and Official ROS package
+### Colcon Workspace and package
 
 This project use packages from other repisotory. These packages are imported and installed under the ```src``` file. The packages is listed below:
 
