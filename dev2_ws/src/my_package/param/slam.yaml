@@ -10,15 +10,15 @@ myslam:
 
     ndt_resolution: 5.0
     ndt_num_threads: 8
-    neighborhood_search_method: "DIRECT7"
+    neighborhood_search_method: "KDTREE"
 
     gicp_corr_dist_threshold: 5.0
 
-    vg_size: 1.0
-    vg_size_map: 0.5
+    vg_size: 0.9
+    vg_size_map: 0.4
 
     R_variance: 100.0
-    Kalman_Filter_model: "CHCA"
+    Kalman_Filter_model: "CHCV"
 
-    use_ekf: true
+    use_ekf: false
     neglect_roll_pitch_z: true

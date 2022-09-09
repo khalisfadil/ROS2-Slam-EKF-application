@@ -1,28 +1,20 @@
 #!/bin/sh
 
-xterm -e "cd $(pwd)/../result/autobin_result/output_05_aug/scene_7;
-mkdir -p result/d1_7_res;
-evo_res d1_chca_7/tum/distances/result.zip d1_chcv_7/tum/distances/result.zip d1_non_7/tum/distances/result.zip -p --save_plot result/d1_7_res/d1_7_res --ignore_title --use_rel_time --save_table result/d1_7_res/d1_7_res.csv;
-mkdir -p result/d7_7_res;
-evo_res d7_chca_7/tum/distances/result.zip d7_chcv_7/tum/distances/result.zip d7_non_7/tum/distances/result.zip -p --save_plot result/d7_7_res/d7_7_res --ignore_title --use_rel_time --save_table result/d7_7_res/d7_7_res.csv;
-mkdir -p result/kd_7_res;
-evo_res kd_chca_7/tum/distances/result.zip kd_chcv_7/tum/distances/result.zip kd_non_7/tum/distances/result.zip -p --save_plot result/kd_7_res/kd_7_res --ignore_title --use_rel_time --save_table result/kd_7_res/kd_7_res.csv;
-mkdir -p result/chca_7_res;
-evo_res d1_chca_7/tum/distances/result.zip d7_chca_7/tum/distances/result.zip kd_chca_7/tum/distances/result.zip -p --save_plot result/chca_7_res/chca_7_res --ignore_title --use_rel_time --save_table result/chca_7_res/chca_7_res.csv;
-mkdir -p result/chcv_7_res;
-evo_res d1_chcv_7/tum/distances/result.zip d7_chcv_7/tum/distances/result.zip kd_chcv_7/tum/distances/result.zip -p --save_plot result/chcv_7_res/chcv_7_res --ignore_title --use_rel_time --save_table result/chcv_7_res/chcv_7_res.csv;
-mkdir -p result/non_7_res;
-evo_res d1_non_7/tum/distances/result.zip d7_non_7/tum/distances/result.zip kd_non_7/tum/distances/result.zip -p --save_plot result/non_7_res/non_7_res --ignore_title --use_rel_time --save_table result/non_7_res/non_7_res.csv;
+xterm -e "cd $(pwd)/../result/autobin_result/output_18_aug/set_1/scene_41;
+mkdir -p RESULT/D1;
+evo_res NDT_D1_BASELINE/tum/distances/result.zip NDT_D1_CA/tum/distances/result.zip NDT_D1_CV/tum/distances/result.zip NDT_D1_NON/tum/distances/result.zip -p --save_plot RESULT/D1/D1 --ignore_title --use_rel_time --save_table RESULT/D1/D1.csv;
+mkdir -p RESULT/D7;
+evo_res NDT_D7_BASELINE/tum/distances/result.zip NDT_D7_CA/tum/distances/result.zip NDT_D7_CV/tum/distances/result.zip NDT_D7_NON/tum/distances/result.zip -p --save_plot RESULT/D7/D7 --ignore_title --use_rel_time --save_table RESULT/D7/D7.csv;
+mkdir -p RESULT/KD;
+evo_res NDT_KD_BASELINE/tum/distances/result.zip NDT_KD_CA/tum/distances/result.zip NDT_KD_CV/tum/distances/result.zip NDT_KD_NON/tum/distances/result.zip -p --save_plot RESULT/KD/KD --ignore_title --use_rel_time --save_table RESULT/KD/KD.csv;
+mkdir -p RESULT/ICP;
+evo_res ICP_KD__BASELINE/tum/distances/result.zip ICP_KD_CA/tum/distances/result.zip ICP_KD_CV/tum/distances/result.zip ICP_KD_NON/tum/distances/result.zip -p --save_plot RESULT/ICP/ICP --ignore_title --use_rel_time --save_table RESULT/ICP/ICP.csv;
 
-mkdir -p result/d1_7_index_res;
-evo_res d1_chca_7/tum/index/result.zip d1_chcv_7/tum/index/result.zip d1_non_7/tum/index/result.zip -p --save_plot result/d1_7_index_res/d1_7_res --ignore_title --use_rel_time --save_table result/d1_7_index_res/d1_7_res.csv;
-mkdir -p result/d7_7_index_res;
-evo_res d7_chca_7/tum/index/result.zip d7_chcv_7/tum/index/result.zip d7_non_7/tum/index/result.zip -p --save_plot result/d7_7_index_res/d7_7_res --ignore_title --use_rel_time --save_table result/d7_7_index_res/d7_7_res.csv;
-mkdir -p result/kd_7_index_res;
-evo_res kd_chca_7/tum/index/result.zip kd_chcv_7/tum/index/result.zip kd_non_7/tum/index/result.zip -p --save_plot result/kd_7_index_res/kd_7_res --ignore_title --use_rel_time --save_table result/kd_7_index_res/kd_7_res.csv;
-mkdir -p result/chca_7_index_res;
-evo_res d1_chca_7/tum/index/result.zip d7_chca_7/tum/index/result.zip kd_chca_7/tum/index/result.zip -p --save_plot result/chca_7_index_res/chca_7_res --ignore_title --use_rel_time --save_table result/chca_7_index_res/chca_7_res.csv;
-mkdir -p result/chcv_7_index_res;
-evo_res d1_chcv_7/tum/index/result.zip d7_chcv_7/tum/index/result.zip kd_chcv_7/tum/index/result.zip -p --save_plot result/chcv_7_index_res/chcv_7_res --ignore_title --use_rel_time --save_table result/chcv_7_index_res/chcv_7_res.csv;
-mkdir -p result/non_7_index_res;
-evo_res d1_non_7/tum/index/result.zip d7_non_7/tum/index/result.zip kd_non_7/tum/index/result.zip -p --save_plot result/non_7_index_res/non_7_res --ignore_title --use_rel_time --save_table result/non_7_index_res/non_7_res.csv " 
+mkdir -p RESULT/CA;
+evo_res NDT_D1_CA/tum/distances/result.zip NDT_D7_CA/tum/distances/result.zip NDT_KD_CA/tum/distances/result.zip ICP_KD_CA/tum/distances/result.zip -p --save_plot RESULT/CA/CA --ignore_title --use_rel_time --save_table RESULT/CA/CA.csv;
+mkdir -p RESULT/CV;
+evo_res NDT_D1_CV/tum/distances/result.zip NDT_D7_CV/tum/distances/result.zip NDT_KD_CV/tum/distances/result.zip ICP_KD_CV/tum/distances/result.zip -p --save_plot RESULT/CV/CV --ignore_title --use_rel_time --save_table RESULT/CV/CV.csv;
+
+"&
+
+

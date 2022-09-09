@@ -175,7 +175,7 @@ namespace autobin
             //================================
             step++;
             std::cout << "Step: " << step << std::endl;
-            if(step <= 185 )
+            if(step <= 185)
             {
                 gps_available = true;
             }else{

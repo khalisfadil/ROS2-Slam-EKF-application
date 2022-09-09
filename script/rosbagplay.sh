@@ -16,11 +16,11 @@ sleep 5
 xterm -e " cd /opt/my_data/v04_bag;
 source /opt/ros/noetic/setup.bash;
 source /opt/ros/foxy/setup.bash;
-ros2 bag play -s rosbag_v2 6.bag --topics front_lidar /odom;
-sleep 20;
-ros2 bag play -s rosbag_v2 7.bag --topics front_lidar /odom" &
+ros2 bag play -s rosbag_v2 30.bag --topics front_lidar /odom;
+sleep 15;
+ros2 bag play -s rosbag_v2 9.bag --topics front_lidar /odom;" &
 
-sleep 190
+sleep 182
 
 xterm -e "./rosbagrecord.sh" &
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-xterm -e "cd $(pwd)/../result/autobin_result/output_05_aug/scene_7/d1_chca_7;
+xterm -e "cd $(pwd)/../result/autobin_result/output_18_aug/set_2/scene_9/NDT_KD_NEGLECT;
 source /opt/ros/foxy/setup.bash;
 ros2 bag record -o rosbag /current_pose /ref_pose" 
 
