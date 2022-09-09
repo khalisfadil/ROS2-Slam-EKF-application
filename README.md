@@ -70,7 +70,7 @@ chmod +x rosbagplay.sh
 
 This project use packages from other repisotory. These packages are imported and installed under the ```src``` file. The packages is listed below:
 
-1. [ndt_omp_ros2](https://github.com/ros-perception/slam_gmapping)
+1. [ndt_omp_ros2](https://github.com/rsasaki0109/ndt_omp_ros2.git)
 
 
 ### Localization
