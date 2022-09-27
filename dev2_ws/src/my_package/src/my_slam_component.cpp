@@ -159,12 +159,12 @@ namespace autobin
 
             registration = ndt_omp;
 
-        }else if(registration_method == "GICP_OMP")
+        }else if(registration_method == "ICP")
         {
-            pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>::Ptr gicp_omp(new pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>());
-            gicp_omp->setMaxCorrespondenceDistance(gicp_corr_dist_threshold);
-            gicp_omp->setTransformationEpsilon(0.01);
-            registration = gicp_omp;
+            pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>::Ptr icp(new pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>());
+            icp->setMaxCorrespondenceDistance(gicp_corr_dist_threshold);
+            icp->setTransformationEpsilon(0.01);
+            registration = icp;
         }
 
         //call the odom msg
